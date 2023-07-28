@@ -6,9 +6,9 @@ import subprocess
 import glob
 
 # Get HALLD_HOME environment variable, verifying it is set
-halld_home = os.getenv('HALLD_HOME')
+halld_home = os.getenv('HALLD_RECON_HOME')
 if(halld_home == None):
-        print 'HALLD_HOME environment variable not set!'
+        print 'HALLD_RECON_HOME environment variable not set!'
         exit(-1)
 
 # Get HALLD_MY if it exists. Otherwise use HALLD_HOME
