@@ -944,6 +944,15 @@ int main (int argc, char **argv){
                     tpros().setMass(ParticleMass(targetType));
                     hddm_s::MomentumList tmoms = ts().addMomenta();
                     
+					// for now, assume that the "true" photon/Be interaction happens at t=0
+					// and that the distance between the KPT and GlueX target is 24 m
+					// also the KPT has a length of 40 cm
+					// so set the event time based on that
+					// note that standard GlueX units are cm and ns
+					double z_production = randomNum.Uniform(40.)-20.;
+					double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
+					double event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+                    
                     tmoms().setPx(0);
                     tmoms().setPy(0);
                     tmoms().setPz(0);
@@ -964,7 +973,7 @@ int main (int argc, char **argv){
                     hddm_s::OriginList os = vs().addOrigins();
                     hddm_s::ProductList ps = vs().addProducts(part4Vect.size()-2);
                     
-                    os().setT(0.0);
+                    os().setT(event_time);
                     os().setVx(vertex.at(0).X());
                     os().setVy(vertex.at(0).Y());
                     os().setVz(vertex.at(0).Z());
@@ -1021,6 +1030,15 @@ int main (int argc, char **argv){
                 tpros().setMass(ParticleMass(targetType));
                 hddm_s::MomentumList tmoms = ts().addMomenta();
                 
+				// for now, assume that the "true" photon/Be interaction happens at t=0
+				// and that the distance between the KPT and GlueX target is 24 m
+				// also the KPT has a length of 40 cm
+				// so set the event time based on that
+				// note that standard GlueX units are cm and ns
+				double z_production = randomNum.Uniform(40.)-20.;
+				double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
+				double event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+                    
                 tmoms().setPx(0);
                 tmoms().setPy(0);
                 tmoms().setPz(0);
@@ -1041,7 +1059,7 @@ int main (int argc, char **argv){
                 hddm_s::OriginList os = vs().addOrigins();
                 hddm_s::ProductList ps = vs().addProducts(num_tracks-2);
                 
-                os().setT(0.0);
+                os().setT(event_time);
                 os().setVx(vertex.at(0).X());
                 os().setVy(vertex.at(0).Y());
                 os().setVz(vertex.at(0).Z());
