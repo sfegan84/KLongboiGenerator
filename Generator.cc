@@ -91,12 +91,15 @@ int main (int argc, char **argv){
     int PrintEvents=0;
     int c;
     int max = 1;
+    bool SIMULATE_BEAM_TIMING = true;
+    bool SIMULATE_KPT_THICKNESS = true;
+    
     JGenBeamEnergy *beamE=new JGenBeamEnergy(kaon, histo, 0.0, 8.0); //JLA  default plain distribution
     if (argc == 1){
         PrintUsage (ProgName);
         exit (0);
     }
-    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:")) != -1){ //returns -1 if no more options are present
+    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c")) != -1){ //returns -1 if no more options are present
         switch (c){
             case 'h':
                 PrintUsage (ProgName);
@@ -119,6 +122,12 @@ int main (int argc, char **argv){
                 break;
             case 'S':
                 OBS = optarg;   //added option -S to generate polarised cross sections
+                break;
+            case 't':
+                SIMULATE_BEAM_TIMING = false;
+                break;
+            case 'c':
+                SIMULATE_KPT_THICKNESS = false;
                 break;
             default:
                 fprintf (stderr, "Unrecognized argument: [-%c]\n\n", c);
@@ -949,9 +958,14 @@ int main (int argc, char **argv){
 					// also the KPT has a length of 40 cm
 					// so set the event time based on that
 					// note that standard GlueX units are cm and ns
-					double z_production = randomNum.Uniform(40.)-20.;
-					double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
-					double event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+					double event_time = 0.;
+					if(SIMULATE_BEAM_TIMING) {
+						double z_production = 0.;
+						if(SIMULATE_KPT_THICKNESS) 
+							z_production = randomNum.Uniform(40.)-20.;
+						double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
+						event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+					}
                     
                     tmoms().setPx(0);
                     tmoms().setPy(0);
@@ -1035,9 +1049,14 @@ int main (int argc, char **argv){
 				// also the KPT has a length of 40 cm
 				// so set the event time based on that
 				// note that standard GlueX units are cm and ns
-				double z_production = randomNum.Uniform(40.)-20.;
-				double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
-				double event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+				double event_time = 0.;
+				if(SIMULATE_BEAM_TIMING) {
+					double z_production = 0.;
+					if(SIMULATE_KPT_THICKNESS) 
+						z_production = randomNum.Uniform(40.)-20.;
+					double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
+					event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+                }
                     
                 tmoms().setPx(0);
                 tmoms().setPy(0);
@@ -1115,6 +1134,8 @@ void PrintUsage (char *processName){
     cout << "\t-R <reaction code>\tReaction to Generate. See below for codes\n";
     cout << "\t-M[#]\t\t\tProcess # number of events\n";
     cout << "\t-P\t\t\tPrint generated events\n";
+    cout << "\t-t\t\t\tDisable simulated beam timing\n";
+    cout << "\t-t\t\t\tDisable simulated target (KPT) distribution\n";
     cout << "\t-E <expression>\t\tSee below Values of E is kinetic energy of beam. If no E is specified, Kaon beam is assumed\n\t\t\t\t and it is sampled from BeamProfile_kaons.root \n\n";
     cout << "\t-S <Solution>\t\tSelected solution for polarised cross section. If no S is specified, phase space is generated.\n\t\t\t\tNow only reaction kln3 is supported. \n\n";
     cout << "\t <reaction code> \n";
