@@ -76,6 +76,15 @@
 #define PDGID_piminus -211
 #define PDGID_pizero 111
 
+//const double TARGET_Z_CENTER = 65.;   // GlueX standard
+//const double TARGET_Z_LENGTH = 30.;   // GlueX standard
+const double TARGET_Z_CENTER = 60.;  // cm
+const double TARGET_Z_LENGTH = 40.;  // cm
+const double TARGET_RADIUS = 3.;     // cm
+const double KPT_Z_LENGTH = 40.;     // cm
+const double DISTANCE_KPT_SPECTROMETER = 24.*100.;   // cm
+const double SPEED_OF_LIGHT_CM_NS = 29.9792;   // cm/ns
+
 using namespace std;
 void PrintUsage (char *processName);
 int main (int argc, char **argv){
@@ -93,6 +102,7 @@ int main (int argc, char **argv){
     int max = 1;
     bool SIMULATE_BEAM_TIMING = true;
     bool SIMULATE_KPT_THICKNESS = true;
+    bool SIMULATE_TARGET_SIZE = true;
     
     JGenBeamEnergy *beamE=new JGenBeamEnergy(kaon, histo, 0.0, 8.0); //JLA  default plain distribution
     if (argc == 1){
@@ -128,6 +138,9 @@ int main (int argc, char **argv){
                 break;
             case 'c':
                 SIMULATE_KPT_THICKNESS = false;
+                break;
+            case 'g':
+                SIMULATE_TARGET_SIZE = false;
                 break;
             default:
                 fprintf (stderr, "Unrecognized argument: [-%c]\n\n", c);
@@ -855,6 +868,11 @@ int main (int argc, char **argv){
         part4Vect.clear();
         vertex.clear();
         tempVert.SetXYZ(0, 0, 65);
+        if(SIMULATE_TARGET_SIZE) {
+        	double target_r = randomNum.Uniform(0.,TARGET_RADIUS);
+        	double target_phi = randomNum.Uniform(0.,TMath::TwoPi());
+        	tempVert.SetXYZ(target_r*cos(target_phi),target_r*sin(target_phi),TARGET_Z_CENTER+randomNum.Uniform(-TARGET_Z_LENGTH/2.,TARGET_Z_LENGTH/2.));
+        }
         if (Nevents % 100 == 0){
             fprintf (stderr, "%d\r", Nevents);
             fflush (stderr);
@@ -953,18 +971,21 @@ int main (int argc, char **argv){
                     tpros().setMass(ParticleMass(targetType));
                     hddm_s::MomentumList tmoms = ts().addMomenta();
                     
-					// for now, assume that the "true" photon/Be interaction happens at t=0
-					// and that the distance between the KPT and GlueX target is 24 m
-					// also the KPT has a length of 40 cm
-					// so set the event time based on that
+                    
+                    
+					// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
+					// (the front face of the spectrometer)
+					// currently assuming that the distance between the center of the KPT target and the front
+					// of the spectrometer is 24 m, and the KPT has a length of 40 cm
+					// so set the event time based on that, assuming the kaons are moving purely in the z-direction
 					// note that standard GlueX units are cm and ns
-					double event_time = 0.;
+					double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
 					if(SIMULATE_BEAM_TIMING) {
 						double z_production = 0.;
 						if(SIMULATE_KPT_THICKNESS) 
-							z_production = randomNum.Uniform(40.)-20.;
-						double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
-						event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
+							z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
+						double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
+						event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
 					}
                     
                     tmoms().setPx(0);
@@ -1044,20 +1065,21 @@ int main (int argc, char **argv){
                 tpros().setMass(ParticleMass(targetType));
                 hddm_s::MomentumList tmoms = ts().addMomenta();
                 
-				// for now, assume that the "true" photon/Be interaction happens at t=0
-				// and that the distance between the KPT and GlueX target is 24 m
-				// also the KPT has a length of 40 cm
-				// so set the event time based on that
+				// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
+				// (the front face of the spectrometer)
+				// currently assuming that the distance between the center of the KPT target and the front
+				// of the spectrometer is 24 m, and the KPT has a length of 40 cm
+				// so set the event time based on that, assuming the kaons are moving purely in the z-direction
 				// note that standard GlueX units are cm and ns
-				double event_time = 0.;
+				double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
 				if(SIMULATE_BEAM_TIMING) {
 					double z_production = 0.;
 					if(SIMULATE_KPT_THICKNESS) 
-						z_production = randomNum.Uniform(40.)-20.;
-					double beam_velocity = (part4Vect.at(0).P() * 29.9792 ) / part4Vect.at(0).E();
-					event_time = ( (24. * 100.) + z_production ) / beam_velocity;  
-                }
-                    
+						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
+					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
+					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
+				}
+				
                 tmoms().setPx(0);
                 tmoms().setPy(0);
                 tmoms().setPz(0);
@@ -1135,7 +1157,8 @@ void PrintUsage (char *processName){
     cout << "\t-M[#]\t\t\tProcess # number of events\n";
     cout << "\t-P\t\t\tPrint generated events\n";
     cout << "\t-t\t\t\tDisable simulated beam timing\n";
-    cout << "\t-t\t\t\tDisable simulated target (KPT) distribution\n";
+    cout << "\t-t\t\t\tDisable simulated production target (KPT) distribution\n";
+    cout << "\t-g\t\t\tDisable simulated cyrotarget (LH2/LD2) distribution\n";
     cout << "\t-E <expression>\t\tSee below Values of E is kinetic energy of beam. If no E is specified, Kaon beam is assumed\n\t\t\t\t and it is sampled from BeamProfile_kaons.root \n\n";
     cout << "\t-S <Solution>\t\tSelected solution for polarised cross section. If no S is specified, phase space is generated.\n\t\t\t\tNow only reaction kln3 is supported. \n\n";
     cout << "\t <reaction code> \n";
