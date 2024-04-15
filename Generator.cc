@@ -869,7 +869,7 @@ int main (int argc, char **argv){
         vertex.clear();
         tempVert.SetXYZ(0, 0, 65);
         if(SIMULATE_TARGET_SIZE) {
-        	double target_r = randomNum.Uniform(0.,TARGET_RADIUS);
+        	double target_r = TARGET_RADIUS * sqrt(randomNum.Uniform());
         	double target_phi = randomNum.Uniform(0.,TMath::TwoPi());
         	tempVert.SetXYZ(target_r*cos(target_phi),target_r*sin(target_phi),TARGET_Z_CENTER+randomNum.Uniform(-TARGET_Z_LENGTH/2.,TARGET_Z_LENGTH/2.));
         }
