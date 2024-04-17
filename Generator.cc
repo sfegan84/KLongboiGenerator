@@ -109,7 +109,7 @@ int main (int argc, char **argv){
         PrintUsage (ProgName);
         exit (0);
     }
-    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c")) != -1){ //returns -1 if no more options are present
+    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c:g")) != -1){ //returns -1 if no more options are present
         switch (c){
             case 'h':
                 PrintUsage (ProgName);
