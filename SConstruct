@@ -8,7 +8,7 @@ import glob
 # Get HALLD_HOME environment variable, verifying it is set
 halld_home = os.getenv('HALLD_RECON_HOME')
 if(halld_home == None):
-        print 'HALLD_RECON_HOME environment variable not set!'
+        print('HALLD_RECON_HOME environment variable not set!')
         exit(-1)
 
 # Get HALLD_MY if it exists. Otherwise use HALLD_HOME
@@ -91,8 +91,8 @@ env.PrependUnique(    CXXFLAGS = ['-g', '-fPIC', '-Wall'])
 env.PrependUnique(FORTRANFLAGS = ['-g', '-fPIC', '-Wall'])
 
 # Apply any platform/architecture specific settings
-sbms.ApplyPlatformSpecificSettings(env, arch)
-sbms.ApplyPlatformSpecificSettings(env, osname)
+#sbms.ApplyPlatformSpecificSettings(env, arch)
+#sbms.ApplyPlatformSpecificSettings(env, osname)
 
 
 # Make executable from source in this directory
