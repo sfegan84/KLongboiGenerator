@@ -85,6 +85,7 @@ const double KPT_Z_LENGTH = 40.;     // cm
 const double DISTANCE_KPT_SPECTROMETER = 24.*100.;   // cm
 const double SPEED_OF_LIGHT_CM_NS = 29.9792;   // cm/ns
 
+
 using namespace std;
 void PrintUsage (char *processName);
 int main (int argc, char **argv){
@@ -100,16 +101,22 @@ int main (int argc, char **argv){
     int PrintEvents=0;
     int c;
     int max = 1;
+    
     bool SIMULATE_BEAM_TIMING = true;
     bool SIMULATE_KPT_THICKNESS = true;
     bool SIMULATE_TARGET_SIZE = true;
-    
+
+    bool BLEED_THROUGH_MODE = false;
+	int NUM_BLEEDTHROUGH_BUNCH_POS = 16;
+	int NUM_BLEEDTHROUGH_BUNCH_NEG = -16;
+	double BEAM_BUNCH_SEPARATION = 4.;  // (ns), corresponds to 250 MHz
+	   
     JGenBeamEnergy *beamE=new JGenBeamEnergy(kaon, histo, 0.0, 8.0); //JLA  default plain distribution
     if (argc == 1){
         PrintUsage (ProgName);
         exit (0);
     }
-    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c:g")) != -1){ //returns -1 if no more options are present
+    while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c:g:bp:n:")) != -1){ //returns -1 if no more options are present
         switch (c){
             case 'h':
                 PrintUsage (ProgName);
@@ -141,6 +148,15 @@ int main (int argc, char **argv){
                 break;
             case 'g':
                 SIMULATE_TARGET_SIZE = false;
+                break;
+            case 'b':
+                BLEED_THROUGH_MODE = true;
+                break;
+            case 'p':
+                NUM_BLEEDTHROUGH_BUNCH_POS = atoi (optarg);
+                break;
+            case 'n':
+                NUM_BLEEDTHROUGH_BUNCH_NEG = atoi (optarg);
                 break;
             default:
                 fprintf (stderr, "Unrecognized argument: [-%c]\n\n", c);
@@ -985,7 +1001,13 @@ int main (int argc, char **argv){
 						if(SIMULATE_KPT_THICKNESS) 
 							z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
 						double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
-						event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
+						event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;
+						
+						if(BLEED_THROUGH_MODE) {
+							// shift by some number of beam bunches
+							double beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
+							event_time += beam_bucket*BEAM_BUNCH_SEPARATION;
+													}
 					}
                     
                     tmoms().setPx(0);
@@ -1078,6 +1100,12 @@ int main (int argc, char **argv){
 						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
 					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
 					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
+					
+					if(BLEED_THROUGH_MODE) {
+						// shift by some number of beam bunches
+						int beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
+						event_time += static_cast<double>(beam_bucket)*BEAM_BUNCH_SEPARATION;
+					}
 				}
 				
                 tmoms().setPx(0);
