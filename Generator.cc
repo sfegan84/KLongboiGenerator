@@ -165,8 +165,8 @@ int main (int argc, char **argv){
                 break;
         }
     }
-    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
-    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
+    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kl7,kl8,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
+    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kl7","kl8","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
     int   ReactionKey=0;
     while (REACTION && keywordReaction [ReactionKey] && strcasecmp (keywordReaction[ReactionKey], REACTION)) {
         ReactionKey++;
@@ -427,6 +427,54 @@ int main (int argc, char **argv){
             FSmasses=new double[num_tracks-2];
             FSmasses[0]=mass_piplusPDG;
             FSmasses[1]=mass_sigzeroPDG;
+            break;
+        case kl7:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonplus);
+            geant_ID.push_back(G3ID_piminus);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonplus);
+            pdg_ID.push_back(PDGID_piminus);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonplusPDG;
+            FSmasses[1]=mass_piminusPDG;
+            FSmasses[2]=mass_neutPDG;
+            break;
+        case kl8:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonminus);
+            geant_ID.push_back(G3ID_piplus);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonminus);
+            pdg_ID.push_back(PDGID_piplus);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonplusPDG;
+            FSmasses[1]=mass_piminusPDG;
+            FSmasses[2]=mass_neutPDG;
             break;
         case kln1:
             num_tracks=4;
@@ -1196,6 +1244,8 @@ void PrintUsage (char *processName){
     cout << "\tkl4\t Klong p --> pi+ Lambda \n";
     cout << "\tkl5\t Klong p --> pi0 Sigma+ \n";
     cout << "\tkl6\t Klong p --> pi+ Sigma \n";
+    cout << "\tkl7\t Klong p --> K+ pi- p \n";
+    cout << "\tkl7\t Klong p --> K- pi+ p \n";
     cout << "\tkln1\t Klong n --> K- p \n";
     cout << "\tkln2\t Klong n --> Ks n \n";
     cout << "\tkln3\t Klong n --> K+ Xi- \n";
