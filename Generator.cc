@@ -14,6 +14,7 @@
 #include <TTree.h>
 #include <TF1.h>
 #include <TGraph2D.h>
+#include <TString.h>
 //#include <vector>
 //#include <TLorentzVector.h>
 #include <TVector3.h>
@@ -101,6 +102,9 @@ int main (int argc, char **argv){
     int PrintEvents=0;
     int c;
     int max = 1;
+    TString StLocation="./XSections/";
+    TString StExtension=".root";
+    TString StFile, StName;
     
     bool SIMULATE_BEAM_TIMING = true;
     bool SIMULATE_KPT_THICKNESS = true;
@@ -165,8 +169,8 @@ int main (int argc, char **argv){
                 break;
         }
     }
-    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kl7,kl8,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
-    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kl7","kl8","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
+    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kl7,kl8,kl9,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
+    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kl7","kl8","kl9","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
     int   ReactionKey=0;
     while (REACTION && keywordReaction [ReactionKey] && strcasecmp (keywordReaction[ReactionKey], REACTION)) {
         ReactionKey++;
@@ -176,8 +180,8 @@ int main (int argc, char **argv){
         ReactionKey=0;
     }
     
-    enum keywordObs_t {nsol,sol2,sol4}; //reaction keyword
-    char* keywordObs [] = {"nsol","sol2","sol4", NULL }; //reaction keyword
+    enum keywordObs_t {nsol,sol2,sol4,solC}; //reaction keyword
+    char* keywordObs [] = {"nsol","sol2","sol4","solC", NULL }; //reaction keyword
     int   ObsKey=0;
     while (OBS && keywordObs [ObsKey] && strcasecmp (keywordObs[ObsKey], OBS)) {
         ObsKey++;
@@ -187,6 +191,10 @@ int main (int argc, char **argv){
         ObsKey=0;
     }
     
+    //Variables for XSections
+    double XS_weight_Max=1;
+    double XS_weight=1;
+      TH2F *hXSection;
     
     //Variables for Tree
     int num_tracks;
@@ -196,7 +204,7 @@ int main (int argc, char **argv){
     double cs, poly, costhetaK, costhetaPi, Wval;
     /////////
     bool cascadegen=false;
-    
+    bool Cocktail=false;
     double beamMass;
     double *FSmasses, *FSmasses1; //final state masses
     TLorentzVector W, target4vec, temp4vect, pizero4vec;
@@ -276,6 +284,27 @@ int main (int argc, char **argv){
             maxpy=SolPY->GetMaximum();
             maxxs=0.045;
             break;
+        case solC:
+	    cout<<"Generating solC"<<endl;
+	    usesol=1;
+	    
+	  
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot;
+	    fileInRoot= new TFile(StFile);
+	    if (fileInRoot->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;
         default:
             fprintf (stderr, "Unrecognized argument: [-%c]\n\n. Rinning nosolution", c);
             usesol=0;
@@ -476,6 +505,26 @@ int main (int argc, char **argv){
             FSmasses[1]=mass_piminusPDG;
             FSmasses[2]=mass_neutPDG;
             break;
+        case kl9:
+            num_tracks=4;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(0);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_protPDG;
+            break;    
         case kln1:
             num_tracks=4;
             beamType = KLong;
@@ -951,12 +1000,31 @@ int main (int argc, char **argv){
             part4Vect.push_back(target4vec);
             vertex.push_back(tempVert);
             vertex.push_back(tempVert);
-            
+
+	    
             weight = eventPS.Generate ();
-            
+	    XS_weight=1;
+	    if(usesol==1 && Cocktail){
+	      TLorentzVector cms, Mesoncms;
+              double costhetaXS,PXS;
+	      temp4vect=beamE->GetP4();
+	      PXS=temp4vect.P();
+		cms=W;
+	        temp4vectpoint=eventPS.GetDecay(0);
+                temp4vect = *temp4vectpoint;
+		 part4Vect.push_back(temp4vect);
+		 Mesoncms=temp4vect;
+                 Mesoncms.Boost(-cms.BoostVector());
+                 costhetaXS=TMath::Cos(Mesoncms.Theta());
+		 //		 weight=weight*(double(hXSection->Interpolate(PXS,costhetaXS)));
+		XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+		}
             //cout<<"Max weight: "<<eventPS.GetWtMax()<<endl;
-            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax())>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	    //	    if (Cocktail && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	       if (Cocktail && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions for events with more than 2 FS particles.
                 continue;
+	       //            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	       //                continue;
             
             if (usesol==1 && cascadegen){
                 TLorentzVector cms, Kaoncms;
@@ -1267,6 +1335,7 @@ void PrintUsage (char *processName){
     cout << "\tnsol\t No solution; phase space is generated\n";
     cout << "\tsol2\t Solution 2 generated\n";
     cout << "\tsol4\t Solution 4 generated\n";
+    cout << "\tsolC\t Cocktail Solution generated\n";
     cout << "\t<expression> (no whitespace): \n";
     cout << "\t[particle]:[distribution]:[x]:[y] \tDistribution (mono, plain, histo) for particle (kaon, neutron, photon) between [x] and [y]\n";
     cout << "\t              or only [x] for monoenergetic beams. For histo, the beam profile is sampled from  BeamProfile_particle.root\n\n";
