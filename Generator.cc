@@ -581,6 +581,7 @@ int main (int argc, char **argv){
             pdg_ID.push_back(PDGID_neut);
             pdg_ID.push_back(PDGID_kaonplus);
             if (usesol==1){
+	      if(Cocktail==false){
                 geant_ID.push_back(G3ID_piminus);
                 geant_ID.push_back(G3ID_lambd);
                 charge.push_back(-1);
@@ -592,6 +593,7 @@ int main (int argc, char **argv){
                 mytree->Branch("costhetaK",&costhetaK);
                 mytree->Branch("W",&Wval);
                 mytree->Branch("costhetaPi",&costhetaPi);
+	      }
             }
             else {
                 geant_ID.push_back(G3ID_cascminus);
@@ -603,9 +605,11 @@ int main (int argc, char **argv){
             FSmasses[1]=mass_cascminusPDG;
             fermi=1;
             if (usesol==1){
+	      if(Cocktail==false){
                 FSmasses1=new double[2];
                 FSmasses1[0]=mass_piminusPDG;
                 FSmasses1[1]=mass_lambdPDG;
+	      }
             }
             cascadegen=true;
             break;
@@ -1004,12 +1008,18 @@ int main (int argc, char **argv){
 	    
             weight = eventPS.Generate ();
 	    XS_weight=1;
-	    if(usesol==1 && Cocktail){
+	    if(usesol==1 && Cocktail== true){
 	      TLorentzVector cms, Mesoncms;
               double costhetaXS,PXS;
 	      temp4vect=beamE->GetP4();
 	      PXS=temp4vect.P();
 		cms=W;
+
+		
+
+
+
+		
 	        temp4vectpoint=eventPS.GetDecay(0);
                 temp4vect = *temp4vectpoint;
 		 part4Vect.push_back(temp4vect);
@@ -1018,6 +1028,11 @@ int main (int argc, char **argv){
                  costhetaXS=TMath::Cos(Mesoncms.Theta());
 		 //		 weight=weight*(double(hXSection->Interpolate(PXS,costhetaXS)));
 		XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+		for (int fspartl=1;fspartl<num_tracks-2; fspartl++){
+                        temp4vectpoint=eventPS.GetDecay(fspartl);
+                        temp4vect = *temp4vectpoint;
+                        part4Vect.push_back(temp4vect);                    
+                    }
 		}
             //cout<<"Max weight: "<<eventPS.GetWtMax()<<endl;
 	    //	    if (Cocktail && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
