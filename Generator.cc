@@ -560,6 +560,7 @@ int main (int argc, char **argv){
             break;
         case kl4:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
@@ -579,6 +580,7 @@ int main (int argc, char **argv){
             break;
         case kl5:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
@@ -598,6 +600,7 @@ int main (int argc, char **argv){
             break;
         case kl6:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
