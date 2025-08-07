@@ -25,6 +25,8 @@
 //for HDDM format
 #include "HDDM/hddm_s.hpp"
 #include "particleType.h"
+//#include "PrintEvents.h"  //PrintEvents will provide functionality for text output, either to terminal or file
+
 
 #define mass_protPDG 0.93827201
 #define mass_neutPDG 0.939565378
@@ -117,6 +119,7 @@ int main (int argc, char **argv){
         exit (0);
     }
     while ((c = getopt (argc, argv, "hE:F:M:R:P:S:t:c:g:bp:n:")) != -1){ //returns -1 if no more options are present
+      //add new flag "O" for text based output formats. Eventually "F" will be output filename, and "O" will specify output format(s)
         switch (c){
             case 'h':
                 PrintUsage (ProgName);
