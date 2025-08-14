@@ -14,13 +14,17 @@
 #include <TTree.h>
 #include <TF1.h>
 #include <TGraph2D.h>
+#include <TLorentzVector.h>
 
 using namespace std;
 
 class PrintEvents{
 
  public:
-  PrintEvents (vector<TLorentzVector> * part4Vect);
+
+  PrintEvents()=default;
+  
+  void Write(vector<TLorentzVector> * part4Vect);
 
 
 };

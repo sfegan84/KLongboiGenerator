@@ -25,7 +25,7 @@
 //for HDDM format
 #include "HDDM/hddm_s.hpp"
 #include "particleType.h"
-//#include "PrintEvents.h"  //PrintEvents will provide functionality for text output, either to terminal or file
+#include "PrintEvents.h"  //PrintEvents will provide functionality for text output, either to terminal or file
 
 
 #define mass_protPDG 0.93827201
@@ -100,7 +100,7 @@ int main (int argc, char **argv){
     char *REACTION = NULL;
     char *OBS = NULL;
     int WillBeRootOutput = 0;
-    int PrintEvents=0;
+    int PrintOutput=0;
     int c;
     int max = 1;
     
@@ -135,7 +135,8 @@ int main (int argc, char **argv){
                 REACTION = optarg;
                 break;
             case 'P':
-                PrintEvents = 1;
+	      cout << "events will be printed to terminal" << endl;
+                PrintOutput = 1;
                 break;
             case 'E':
                 beamE = new JGenBeamEnergy(optarg);   //JLA added option -E to generate energy distribution
@@ -898,7 +899,7 @@ int main (int argc, char **argv){
     
     if (!ROOTFILE){
         cout<<"File not Specified. Printing generated events on screen"<<endl;
-        PrintEvents=1;
+        PrintOutput=1;
     }
     
     int numberofloops=0;
@@ -1016,13 +1017,15 @@ int main (int argc, char **argv){
                         charge.push_back(1);
                     }
                     
-                    if(PrintEvents){
-                        cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                        <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                        for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
-                            cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                        }
-                        cout<<endl;
+                    if(PrintOutput){
+		      PrintEvents events;
+		      events.Write(&part4Vect);
+                        // cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
+                        // <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
+                        // for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
+                        //     cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
+                        // }
+                        // cout<<endl;
                     }
                     
                     // Start a new event
@@ -1113,13 +1116,18 @@ int main (int argc, char **argv){
                     vertex.push_back(tempVert);
                 }
                 
-                if(PrintEvents){
-                    cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                    <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                    for (int fspartl=2;fspartl<num_tracks; fspartl++){
-                        cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                    }
-                    cout<<endl;
+                if(PrintOutput){
+                    // cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
+                    // <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
+                    // for (int fspartl=2;fspartl<num_tracks; fspartl++){
+                    //     cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
+                    // }
+                    // cout<<endl;
+
+                    // cout << "PrintEvents version" << endl;
+		    
+		    PrintEvents events;
+		    events.Write(&part4Vect);
                 }
                 
                 // Start a new event
