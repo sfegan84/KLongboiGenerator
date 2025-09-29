@@ -14,6 +14,7 @@
 #include <TTree.h>
 #include <TF1.h>
 #include <TGraph2D.h>
+#include <TString.h>
 //#include <vector>
 //#include <TLorentzVector.h>
 #include <TVector3.h>
@@ -64,6 +65,8 @@
 #define PDGID_kaonshort 310
 #define PDGID_kaonplus 321
 #define PDGID_kaonminus -321
+#define PDGID_kaonzero 311
+#define PDGID_kaonzerobar -311
 #define PDGID_prot 2212
 #define PDGID_neut 2112
 #define PDGID_lambd 3122
@@ -101,6 +104,9 @@ int main (int argc, char **argv){
     int PrintEvents=0;
     int c;
     int max = 1;
+    TString StLocation="./XSections/";
+    TString StExtension=".root";
+    TString StFile, StName;
     
     bool SIMULATE_BEAM_TIMING = true;
     bool SIMULATE_KPT_THICKNESS = true;
@@ -165,8 +171,8 @@ int main (int argc, char **argv){
                 break;
         }
     }
-    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kl7,kl8,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
-    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kl7","kl8","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
+    enum keywordReaction_t {kl1,kl2,kl3,kl4,kl5,kl6,kl7,kl8,kl9,kl10,kl11,kl12,kl13,kl14,kl15,kl16,kln1,kln2,kln3,kln4,kln5,kln6,kln7,kln8,g1,g2,g3,n1,n2,n3,n4,n5,n6}; //reaction keyword
+    char* keywordReaction [] = {"kl1","kl2","kl3","kl4","kl5","kl6","kl7","kl8","kl9","kl10","kl11","kl12","kl13","kl14","kl15","kl16","kln1","kln2","kln3","kln4","kln5","kln6","kln7","kln8","g1","g2","g3","n1","n2","n3","n4","n5","n6", NULL }; //reaction keyword
     int   ReactionKey=0;
     while (REACTION && keywordReaction [ReactionKey] && strcasecmp (keywordReaction[ReactionKey], REACTION)) {
         ReactionKey++;
@@ -176,8 +182,8 @@ int main (int argc, char **argv){
         ReactionKey=0;
     }
     
-    enum keywordObs_t {nsol,sol2,sol4}; //reaction keyword
-    char* keywordObs [] = {"nsol","sol2","sol4", NULL }; //reaction keyword
+    enum keywordObs_t {nsol,sol2,sol4,sol10,sol11,sol12,sol13,sol14,sol15,sol16,solC}; //reaction keyword
+    char* keywordObs [] = {"nsol","sol2","sol4","sol10","sol11","sol12","sol13","sol14","sol15","sol16","solC", NULL }; //reaction keyword
     int   ObsKey=0;
     while (OBS && keywordObs [ObsKey] && strcasecmp (keywordObs[ObsKey], OBS)) {
         ObsKey++;
@@ -187,6 +193,10 @@ int main (int argc, char **argv){
         ObsKey=0;
     }
     
+    //Variables for XSections
+    double XS_weight_Max=1;
+    double XS_weight=1;
+      TH2F *hXSection;
     
     //Variables for Tree
     int num_tracks;
@@ -196,7 +206,14 @@ int main (int argc, char **argv){
     double cs, poly, costhetaK, costhetaPi, Wval;
     /////////
     bool cascadegen=false;
-    
+    bool Cocktail=false;
+    bool Sol10=false;
+    bool Sol11=false;
+    bool Sol12=false;
+    bool Sol13=false;
+    bool Sol14=false;
+    bool Sol15=false;
+    bool Sol16=false;
     double beamMass;
     double *FSmasses, *FSmasses1; //final state masses
     TLorentzVector W, target4vec, temp4vect, pizero4vec;
@@ -276,6 +293,176 @@ int main (int argc, char **argv){
             maxpy=SolPY->GetMaximum();
             maxxs=0.045;
             break;
+        case solC:
+	    cout<<"Generating solC"<<endl;
+	    usesol=1;
+	    
+	  
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot;
+	    fileInRoot= new TFile(StFile);
+	    if (fileInRoot->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;
+        case sol10:
+	    cout<<"Generating sol10"<<endl;
+	    usesol=1;
+	    
+	  
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot10;
+	    fileInRoot10= new TFile(StFile);
+	    if (fileInRoot10->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot10->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol10=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;
+        case sol11:
+	    cout<<"Generating sol11"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot11;
+	    fileInRoot11= new TFile(StFile);
+	    if (fileInRoot11->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot11->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol11=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;    
+        case sol12:
+	    cout<<"Generating sol12"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot12;
+	    fileInRoot12= new TFile(StFile);
+	    if (fileInRoot12->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot12->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol12=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;
+
+        case sol13:
+	    cout<<"Generating sol13"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot13;
+	    fileInRoot13= new TFile(StFile);
+	    if (fileInRoot13->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot13->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol13=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;    
+        case sol14:
+	    cout<<"Generating sol14"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot14;
+	    fileInRoot14= new TFile(StFile);
+	    if (fileInRoot14->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot14->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol14=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;   
+        case sol15:
+	    cout<<"Generating sol15"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot15;
+	    fileInRoot15= new TFile(StFile);
+	    if (fileInRoot15->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot15->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol15=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;    
+        case sol16:
+	    cout<<"Generating sol16"<<endl;
+	    usesol=1;
+	     
+	  
+	  
+	    StName=keywordReaction [ReactionKey];
+	  
+	    StFile=StLocation+StName+StExtension;
+	    TFile *fileInRoot16;
+	    fileInRoot16= new TFile(StFile);
+	    if (fileInRoot16->IsZombie()) {
+	      cout << "Error opening XS file" << endl;
+	    }
+	    //TH2F *hXSection;
+	    fileInRoot16->GetObject("h22",hXSection);
+	    XS_weight_Max=hXSection->GetMaximum();
+	    Sol16=true;
+	    //Cocktail=true;
+	    //   cout<<"XXXXXXXXXXXXXXX"<<endl;
+	    break;   	    
         default:
             fprintf (stderr, "Unrecognized argument: [-%c]\n\n. Rinning nosolution", c);
             usesol=0;
@@ -373,6 +560,7 @@ int main (int argc, char **argv){
             break;
         case kl4:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
@@ -392,6 +580,7 @@ int main (int argc, char **argv){
             break;
         case kl5:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
@@ -411,6 +600,7 @@ int main (int argc, char **argv){
             break;
         case kl6:
             num_tracks=4;
+	    beamType = KLong;
             beamMass=mass_kaonzeroPDG;
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
@@ -476,6 +666,196 @@ int main (int argc, char **argv){
             FSmasses[1]=mass_piminusPDG;
             FSmasses[2]=mass_neutPDG;
             break;
+        case kl9:
+            num_tracks=4;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(0);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_protPDG;
+            break;
+	  case kl10:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonminus);
+            geant_ID.push_back(G3ID_piplus);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonminus);
+            pdg_ID.push_back(PDGID_piplus);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonplusPDG;
+            FSmasses[1]=mass_piminusPDG;
+            FSmasses[2]=mass_protPDG;
+            break;
+	  case kl11:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonshort);
+            geant_ID.push_back(G3ID_pizero);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonzerobar);
+            pdg_ID.push_back(PDGID_pizero);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_pizeroPDG;
+            FSmasses[2]=mass_protPDG;
+            break;
+	  case kl12:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonshort);
+            geant_ID.push_back(G3ID_piplus);
+            geant_ID.push_back(G3ID_neut);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonzerobar);
+            pdg_ID.push_back(PDGID_piplus);
+            pdg_ID.push_back(PDGID_neut);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_piplusPDG;
+            FSmasses[2]=mass_neutPDG;
+            break;
+
+	  case kl13:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonshort);
+            geant_ID.push_back(G3ID_pizero);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonzero);
+            pdg_ID.push_back(PDGID_pizero);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_pizeroPDG;
+            FSmasses[2]=mass_protPDG;
+            break;
+	  case kl14:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonshort);
+            geant_ID.push_back(G3ID_piplus);
+            geant_ID.push_back(G3ID_neut);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonzero);
+            pdg_ID.push_back(PDGID_piplus);
+            pdg_ID.push_back(PDGID_neut);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonzeroPDG;
+            FSmasses[1]=mass_piplusPDG;
+            FSmasses[2]=mass_neutPDG;
+            break;
+
+	  case kl15:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonplus);
+            geant_ID.push_back(G3ID_pizero);
+            geant_ID.push_back(G3ID_neut);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonplus);
+            pdg_ID.push_back(PDGID_pizero);
+            pdg_ID.push_back(PDGID_neut);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonplusPDG;
+            FSmasses[1]=mass_pizeroPDG;
+            FSmasses[2]=mass_neutPDG;
+            break;
+	  case kl16:
+            num_tracks=5;
+            beamType = KLong;
+            beamMass=mass_kaonzeroPDG;
+            geant_ID.push_back(G3ID_kaonlong);
+            geant_ID.push_back(G3ID_prot);
+            geant_ID.push_back(G3ID_kaonplus);
+            geant_ID.push_back(G3ID_piminus);
+            geant_ID.push_back(G3ID_prot);
+            pdg_ID.push_back(PDGID_kaonlong);
+            pdg_ID.push_back(PDGID_prot);
+            pdg_ID.push_back(PDGID_kaonplus);
+            pdg_ID.push_back(PDGID_piminus);
+            pdg_ID.push_back(PDGID_prot);
+            charge.push_back(0);
+            charge.push_back(1);
+            charge.push_back(-1);
+            charge.push_back(1);
+            charge.push_back(1);
+            FSmasses=new double[num_tracks-2];
+            FSmasses[0]=mass_kaonplusPDG;
+            FSmasses[1]=mass_piplusPDG;
+            FSmasses[2]=mass_protPDG;
+            break;	    
         case kln1:
             num_tracks=4;
             beamType = KLong;
@@ -532,6 +912,7 @@ int main (int argc, char **argv){
             pdg_ID.push_back(PDGID_neut);
             pdg_ID.push_back(PDGID_kaonplus);
             if (usesol==1){
+	      if(Cocktail==false){
                 geant_ID.push_back(G3ID_piminus);
                 geant_ID.push_back(G3ID_lambd);
                 charge.push_back(-1);
@@ -543,6 +924,7 @@ int main (int argc, char **argv){
                 mytree->Branch("costhetaK",&costhetaK);
                 mytree->Branch("W",&Wval);
                 mytree->Branch("costhetaPi",&costhetaPi);
+	      }
             }
             else {
                 geant_ID.push_back(G3ID_cascminus);
@@ -554,9 +936,11 @@ int main (int argc, char **argv){
             FSmasses[1]=mass_cascminusPDG;
             fermi=1;
             if (usesol==1){
+	      if(Cocktail==false){
                 FSmasses1=new double[2];
                 FSmasses1[0]=mass_piminusPDG;
                 FSmasses1[1]=mass_lambdPDG;
+	      }
             }
             cascadegen=true;
             break;
@@ -951,12 +1335,100 @@ int main (int argc, char **argv){
             part4Vect.push_back(target4vec);
             vertex.push_back(tempVert);
             vertex.push_back(tempVert);
-            
+
+	    
             weight = eventPS.Generate ();
-            
-            //cout<<"Max weight: "<<eventPS.GetWtMax()<<endl;
-            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax())>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	    XS_weight=1;
+
+
+	    
+	    if(Sol10==true||Sol11==true||Sol12==true||Sol13==true||Sol14==true||Sol15==true||Sol16==true){
+	      TLorentzVector cms, pp1,pp2,pp3,pp23,pp1D,pp2D,pp3D;
+	      double costhetaXS,costhetaXS1,PXS, DD_weight, Th_weight;
+	       temp4vect=beamE->GetP4();
+	      PXS=temp4vect.P();
+		cms=W;
+		temp4vectpoint=eventPS.GetDecay(0);
+                temp4vect = *temp4vectpoint;
+		 part4Vect.push_back(temp4vect);
+		 pp1=temp4vect;
+                 pp1.Boost(-cms.BoostVector());
+
+		 temp4vectpoint=eventPS.GetDecay(1);
+                 temp4vect = *temp4vectpoint;
+		 part4Vect.push_back(temp4vect);
+		 pp2=temp4vect;
+                 pp2.Boost(-cms.BoostVector());
+
+		 temp4vectpoint=eventPS.GetDecay(2);
+                 temp4vect = *temp4vectpoint;
+		 part4Vect.push_back(temp4vect);
+		 pp3=temp4vect;
+                 pp3.Boost(-cms.BoostVector());
+
+		 costhetaXS=TMath::Cos(pp1.Theta());
+ 		 XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+
+		 pp23=pp2+pp3;
+		 pp1D=pp1;
+                 pp1D.Boost(-pp23.BoostVector());
+
+		 pp2D=pp2;
+                 pp2D.Boost(-pp23.BoostVector());
+
+		 pp3D=pp1;
+                 pp3D.Boost(-pp23.BoostVector());
+		 
+
+		
+		 
+		 DD_weight=0.12/4/((pp23.M()-1.232)*(pp23.M()-1.232)+0.12*0.12/4);
+		 Th_weight=(1+3*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P())*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P()))/4;
+		 XS_weight=XS_weight*DD_weight*Th_weight;
+	    }
+
+	    if ((Sol10||Sol11||Sol12||Sol13==true||Sol14==true||Sol15==true||Sol16==true) && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions.
                 continue;
+
+
+
+	 
+
+
+	    
+	    
+	    if(usesol==1 && Cocktail== true){
+	      TLorentzVector cms, Mesoncms;
+              double costhetaXS,PXS;
+	      temp4vect=beamE->GetP4();
+	      PXS=temp4vect.P();
+		cms=W;
+
+		
+
+
+
+		
+	        temp4vectpoint=eventPS.GetDecay(0);
+                temp4vect = *temp4vectpoint;
+		 part4Vect.push_back(temp4vect);
+		 Mesoncms=temp4vect;
+                 Mesoncms.Boost(-cms.BoostVector());
+                 costhetaXS=TMath::Cos(Mesoncms.Theta());
+		 //		 weight=weight*(double(hXSection->Interpolate(PXS,costhetaXS)));
+		XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+		for (int fspartl=1;fspartl<num_tracks-2; fspartl++){
+                        temp4vectpoint=eventPS.GetDecay(fspartl);
+                        temp4vect = *temp4vectpoint;
+                        part4Vect.push_back(temp4vect);                    
+                    }
+		}
+            //cout<<"Max weight: "<<eventPS.GetWtMax()<<endl;
+	    //	    if (Cocktail && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	       if (Cocktail && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions for events with more than 2 FS particles.
+                continue;
+	       //            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	       //                continue;
             
             if (usesol==1 && cascadegen){
                 TLorentzVector cms, Kaoncms;
@@ -1245,7 +1717,15 @@ void PrintUsage (char *processName){
     cout << "\tkl5\t Klong p --> pi0 Sigma+ \n";
     cout << "\tkl6\t Klong p --> pi+ Sigma \n";
     cout << "\tkl7\t Klong p --> K+ pi- p \n";
-    cout << "\tkl7\t Klong p --> K- pi+ p \n";
+    cout << "\tkl8\t Klong p --> K- pi+ p \n";
+    cout << "\tkl9\t Klong p --> Kl p \n";
+    cout << "\tkl10\t Klong p -->K-Delta++ --> K- pi+ p  run with -Ssol10 option \n";
+    cout << "\tkl11\t Klong p -->K0-bar Delta+ --> K0-bar pi0 p run with -Ssol11 option  \n";
+    cout << "\tkl12\t Klong p -->K0-bar Delta+ --> K0-bar pi+ n run with -Ssol12 option  \n";
+    cout << "\tkl13\t Klong p -->K0 Delta+ --> K0 pi0 p run with -Ssol11 option  \n";
+    cout << "\tkl14\t Klong p -->K0 Delta+ --> K0 pi+ n run with -Ssol12 option  \n";
+    cout << "\tkl15\t Klong p -->K+ Delta0 --> K+ pi0 n run with -Ssol11 option  \n";
+    cout << "\tkl16\t Klong p -->K+ Delta0 --> K+ pi- p run with -Ssol12 option  \n";   
     cout << "\tkln1\t Klong n --> K- p \n";
     cout << "\tkln2\t Klong n --> Ks n \n";
     cout << "\tkln3\t Klong n --> K+ Xi- \n";
@@ -1267,6 +1747,7 @@ void PrintUsage (char *processName){
     cout << "\tnsol\t No solution; phase space is generated\n";
     cout << "\tsol2\t Solution 2 generated\n";
     cout << "\tsol4\t Solution 4 generated\n";
+    cout << "\tsolC\t Cocktail Solution generated\n";
     cout << "\t<expression> (no whitespace): \n";
     cout << "\t[particle]:[distribution]:[x]:[y] \tDistribution (mono, plain, histo) for particle (kaon, neutron, photon) between [x] and [y]\n";
     cout << "\t              or only [x] for monoenergetic beams. For histo, the beam profile is sampled from  BeamProfile_particle.root\n\n";
