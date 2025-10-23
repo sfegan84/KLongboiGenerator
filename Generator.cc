@@ -1489,7 +1489,7 @@ int main (int argc, char **argv){
                     
                     if(PrintOutput){
 						PrintEvents events;
-						events.Write(&part4Vect)
+						events.Write(&part4Vect);
                         //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
                         //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
                         //for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
