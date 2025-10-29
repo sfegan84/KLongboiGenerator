@@ -26,5 +26,8 @@ class PrintEvents{
   
   void Write(vector<TLorentzVector> * part4Vect);
 
+  void WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex);
+
+  void WriteHEPmc(vector<TLorentzVector> * part4Vect);
 
 };
