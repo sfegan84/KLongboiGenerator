@@ -100,6 +100,7 @@ int main (int argc, char **argv){
     char *ProgName = argv[0];
     char *ROOTFILE = NULL;
     char *REACTION = NULL;
+    char *OUTTYPE = NULL;
     char *OBS = NULL;
     int WillBeRootOutput = 0;
 	int PrintOutput = 0;
@@ -139,8 +140,9 @@ int main (int argc, char **argv){
                 REACTION = optarg;
                 break;
             case 'P':
-				cout << "Events will be printed to terminal" << endl;
+		cout << "Events will be printed to terminal" << endl;
                 PrintOutput = 1;
+		OUTTYPE = optarg;
                 break;
             case 'E':
                 beamE = new JGenBeamEnergy(optarg);   //JLA added option -E to generate energy distribution
@@ -497,7 +499,19 @@ int main (int argc, char **argv){
     mytree->Branch("charge",&charge);
     mytree->Branch("vertex",&vertex);
     mytree->Branch("Reaction",Reactionstring,"Reactionstring/C", 1024);
-    
+
+
+    enum outputFileType_t {term,lund,hepmc};
+    char* outputFileType [] = {"term","lund","hepmc",NULL};
+    int outputKey = 0;
+
+    while (OUTTYPE && outputFileType [outputKey] && strcasecmp (outputFileType[outputKey], OUTTYPE)){
+      outputKey++;
+    }
+    if(!OUTTYPE || !outputFileType[outputKey]){
+      cout << "Text based format not specified. Printing to terminal" << endl;
+      outputKey=0;
+    }
     
     switch ((keywordReaction_t) ReactionKey) {
         case kl1:
@@ -1488,8 +1502,19 @@ int main (int argc, char **argv){
                     }
                     
                     if(PrintOutput){
-						PrintEvents events;
-						events.Write(&part4Vect);
+			PrintEvents events;
+			switch((outputFileType_t) outputKey){
+			case term:
+			  events.Write(&part4Vect);
+			  break;
+			case lund:
+			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  break;
+			case hepmc:
+			  events.WriteHEPmc(&part4Vect);
+			  break;
+			}
+			
                         //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
                         //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
                         //for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
@@ -1593,8 +1618,18 @@ int main (int argc, char **argv){
                     //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
                     //}
                     //cout<<endl;
-					PrintEvents events;
-					events.Write(&part4Vect);
+		  			PrintEvents events;
+			switch((outputFileType_t) outputKey){
+			case term:
+			  events.Write(&part4Vect);
+			  break;
+			case lund:
+			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  break;
+			case hepmc:
+			  events.WriteHEPmc(&part4Vect);
+			  break;
+			}
                 }
                 
                 // Start a new event

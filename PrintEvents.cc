@@ -38,15 +38,15 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
   cout << "THIS IS A TEST: Lund file will look like this (redirect to a file stream)" << endl;
 
   cout << (int)part4Vect->size() << "\t"
-       << right << "1"
-       << right << "1"
-       << right << "0"
-       << right << "0"
-       << right << "130"
-       << right << part4Vect->at(0).E()
-       << right << pdg_ID->at(1)
-       << right << "0"
-       << right << "1";
+       << right << "1" << "\t"
+       << right << "1" << "\t"
+       << right << "0" << "\t"
+       << right << "0" << "\t"
+       << right << "130" << "\t"
+       << right << part4Vect->at(0).E() << "\t"
+       << right << pdg_ID->at(1) << "\t"
+       << right << "0" << "\t"
+       << right << "1" << endl;
 
   //Particle Loop
   //1 index
@@ -65,7 +65,7 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
   //14 Vertex z (cm)
 
    for (int partl=0;(int)partl<part4Vect->size(); partl++){
-        cout   << right << partl
+     cout   << right << partl << "\t"
 	       << right << "0"
                 << setw(6) << right << "1"
                 << setw(14) << right << pdg_ID->at(partl)
@@ -75,9 +75,9 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
                 << setw(14) << right << part4Vect->at(partl).Py()
                 << setw(14) << right << part4Vect->at(partl).Pz()
                 << setw(14) << right << part4Vect->at(partl).E()
-                << setw(14) << right << part4Vect->at(partl).M()
-	       << setw(6) << right << vertex->at(partl).X()
-	       << setw(6) << right << vertex->at(partl).Y()
+                << setw(14) << right << part4Vect->at(partl).M() << "\t"
+	       << setw(6) << right << vertex->at(partl).X() << "\t"
+	       << setw(6) << right << vertex->at(partl).Y() << "\t"
 	       << setw(6) << right << vertex->at(partl).Z()
                 << endl;
    }
