@@ -85,10 +85,64 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
 }
 
 
-void PrintEvents::WriteHEPmc(vector<TLorentzVector> * part4Vect) {
+void PrintEvents::WriteHEPmc(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex) {
   //Implementation of functionality to write a HEPMC output file
   cout << "HEPMC format output selected" << endl;
 
   cout << "THIS IS A TEST: HEPMC file will look like this (redirect to a file stream)" << endl;
+
+
+
+  cout << "HepMC::Version 3.02.03" << endl;
+  cout << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
+
+  cout << "E " << part4Vect->size() << " " << part4Vect->size() << endl;
+  cout << "U GEV CM" << endl;
+
+     for (int partl=0;(int)partl<2; partl++){
+       cout << setw(2) << "P"
+	    << setw(2) << right << partl+1
+	    << setw(2) << right << "0"
+	    << setw(6) << right << pdg_ID->at(partl)
+	    << setw(12) << right << part4Vect->at(partl).Px()
+	    << setw(12) << right << part4Vect->at(partl).Py()
+	    << setw(12) << right << part4Vect->at(partl).Pz()
+	    << setw(12) << right << part4Vect->at(partl).E()
+	    << setw(12) << right << part4Vect->at(partl).M() << "\t";
+	 if(partl ==0){
+	   cout << setw(2) << right << "4"
+	            << endl;
+	     }
+	 else{
+	   cout << setw(2) << right << "1"
+	            << endl;
+	     }	   
+
+     }
+     for (int partl=2;(int)partl<part4Vect->size(); partl++){
+       cout << setw(2) << "P"
+	    << setw(2) << right << partl+1
+	    << setw(2) << right << "0"
+	    << setw(6) << right << pdg_ID->at(partl)
+	    << setw(12) << right << part4Vect->at(partl).Px()
+	    << setw(12) << right << part4Vect->at(partl).Py()
+	    << setw(12) << right << part4Vect->at(partl).Pz()
+	    << setw(12) << right << part4Vect->at(partl).E()
+	    << setw(12) << right << part4Vect->at(partl).M() << "\t"
+	    << setw(2) << right << "1"
+	    << endl;
+
+       cout << setw(2) << "V"
+	    << setw(2) << right << partl+1
+	    << setw(2) << right << "0\t"
+	    << setw(6) << right << vertex->at(partl).X() << "\t"
+	    << setw(6) << right << vertex->at(partl).Y() << "\t"
+	    << setw(6) << right << vertex->at(partl).Z() << "\t"
+	    << setw(6) << right << part4Vect->at(partl).T()
+	    << endl;
+   }
+  
+
+  cout << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
 
 }

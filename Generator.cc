@@ -512,6 +512,9 @@ int main (int argc, char **argv){
       cout << "Text based format not specified. Printing to terminal" << endl;
       outputKey=0;
     }
+
+
+    
     
     switch ((keywordReaction_t) ReactionKey) {
         case kl1:
@@ -1511,7 +1514,7 @@ int main (int argc, char **argv){
 			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			case hepmc:
-			  events.WriteHEPmc(&part4Vect);
+			  events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			}
 			
@@ -1627,7 +1630,7 @@ int main (int argc, char **argv){
 			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			case hepmc:
-			  events.WriteHEPmc(&part4Vect);
+			  events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			}
                 }
