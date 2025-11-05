@@ -20,6 +20,8 @@ void PrintEvents::Write(vector<TLorentzVector> * part4Vect) {
 
 
 void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex) {
+  cout << "THIS IS A TEST: Lund file will look like this (redirect to a file stream)" << endl;
+
   //Implementation of functionality to write a Lund output file. Using CLAS12 conventions. UD == used designed, users can assign any meaning to them
 
   //Event Header
@@ -33,10 +35,6 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
   // 8 Interacted nucleon id 2212 or 2112 (UD)
   // 9 Process ID (UD)
   // 10 Event weight (UD)
-  cout << "Lund format output selected" << endl;
-
-  cout << "THIS IS A TEST: Lund file will look like this (redirect to a file stream)" << endl;
-
   cout << (int)part4Vect->size() << "\t"
        << right << "1" << "\t"
        << right << "1" << "\t"
@@ -87,14 +85,7 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
 
 void PrintEvents::WriteHEPmc(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex) {
   //Implementation of functionality to write a HEPMC output file
-  cout << "HEPMC format output selected" << endl;
-
-  cout << "THIS IS A TEST: HEPMC file will look like this (redirect to a file stream)" << endl;
-
-
-
-  cout << "HepMC::Version 3.02.03" << endl;
-  cout << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
+  //cout << "THIS IS A TEST: HEPMC file will look like this (redirect to a file stream)" << endl;
 
   cout << "E " << part4Vect->size() << " " << part4Vect->size() << endl;
   cout << "U GEV CM" << endl;
@@ -142,7 +133,5 @@ void PrintEvents::WriteHEPmc(vector<TLorentzVector> * part4Vect, vector<int> * p
 	    << endl;
    }
   
-
-  cout << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
 
 }

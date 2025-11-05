@@ -140,7 +140,7 @@ int main (int argc, char **argv){
                 REACTION = optarg;
                 break;
             case 'P':
-		cout << "Events will be printed to terminal" << endl;
+		cout << "Events will be printed to terminal or text based file format as specified" << endl;
                 PrintOutput = 1;
 		OUTTYPE = optarg;
                 break;
@@ -513,7 +513,29 @@ int main (int argc, char **argv){
       outputKey=0;
     }
 
+    PrintEvents events;
+    string mystring3;
+    mystring3=mystring.substr(0, mystring.length()-4);
 
+    switch ((outputFileType_t) outputKey) {
+    case term:
+      cout << "Terminal output specified. Events will be displayed to terminal" << endl;
+      break;
+    case lund:
+      mystring3.append("dat");
+      cout << "Lund format output selected. Events will be written to " << mystring3 << endl;
+      break;
+    case hepmc:
+      mystring3.append("hepmc");
+      cout << "HepMC format output selected. Events will be written to " << mystring3 << endl;
+      
+      //hepmc file header
+      cout << "HepMC::Version 3.02.03" << endl;
+      cout << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
+
+      break;
+
+    }
     
     
     switch ((keywordReaction_t) ReactionKey) {
@@ -1505,7 +1527,6 @@ int main (int argc, char **argv){
                     }
                     
                     if(PrintOutput){
-			PrintEvents events;
 			switch((outputFileType_t) outputKey){
 			case term:
 			  events.Write(&part4Vect);
@@ -1621,7 +1642,6 @@ int main (int argc, char **argv){
                     //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
                     //}
                     //cout<<endl;
-		  			PrintEvents events;
 			switch((outputFileType_t) outputKey){
 			case term:
 			  events.Write(&part4Vect);
@@ -1732,7 +1752,10 @@ int main (int argc, char **argv){
     if (WillBeRootOutput){
         RootOut->Write ();
         delete outfile;
-        
+
+	//close hepmcfile
+	cout << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
+
     }
     cout << "Number of events processed: " << Nevents << endl;
     return 0;
