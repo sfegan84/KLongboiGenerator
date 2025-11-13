@@ -246,7 +246,10 @@ int main (int argc, char **argv){
     Double_t w, t, x,y;
     Int_t nlines = 0;
     ifstream in1;
+    ofstream out1; //text-based output
+    stringstream outfilestream;
 
+    
     double maxxs=0.0, maxpy=0.0;
     switch ((keywordObs_t) ObsKey) {
         case nsol:
@@ -512,7 +515,6 @@ int main (int argc, char **argv){
       cout << "Text based format not specified. Printing to terminal" << endl;
       outputKey=0;
     }
-
     PrintEvents events;
     string mystring3;
     mystring3=mystring.substr(0, mystring.length()-4);
@@ -524,19 +526,26 @@ int main (int argc, char **argv){
     case lund:
       mystring3.append("dat");
       cout << "Lund format output selected. Events will be written to " << mystring3 << endl;
+      out1.open(mystring3);
       break;
     case hepmc:
       mystring3.append("hepmc");
       cout << "HepMC format output selected. Events will be written to " << mystring3 << endl;
       
+      out1.open(mystring3);
+	    
       //hepmc file header
       cout << "HepMC::Version 3.02.03" << endl;
       cout << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
 
+      out1 << "HepMC::Version 3.02.03" << endl;
+      out1 << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
+
       break;
 
     }
-    
+
+
     
     switch ((keywordReaction_t) ReactionKey) {
         case kl1:
@@ -1535,7 +1544,9 @@ int main (int argc, char **argv){
 			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			case hepmc:
-			  events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
 			  break;
 			}
 			
@@ -1650,7 +1661,9 @@ int main (int argc, char **argv){
 			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
 			  break;
 			case hepmc:
-			  events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
 			  break;
 			}
                 }
@@ -1753,8 +1766,20 @@ int main (int argc, char **argv){
         RootOut->Write ();
         delete outfile;
 
+	switch ((outputFileType_t) outputKey) {
+	case term:
+	  break;
+	case lund:
+	  out1.close();
+	  break;
+	case hepmc:
 	//close hepmcfile
 	cout << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
+	out1 << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
+	out1.close();
+	break;
+	
+	}
 
     }
     cout << "Number of events processed: " << Nevents << endl;
