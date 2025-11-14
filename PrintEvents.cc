@@ -18,10 +18,10 @@ void PrintEvents::Write(vector<TLorentzVector> * part4Vect) {
 }
 
 
-void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex) {
-  cout << "THIS IS A TEST: Lund file will look like this (redirect to a file stream)" << endl;
+stringstream PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex) {
+    //Implementation of functionality to write a Lund output file. Using CLAS12 conventions. UD == used designed, users can assign any meaning to them
 
-  //Implementation of functionality to write a Lund output file. Using CLAS12 conventions. UD == used designed, users can assign any meaning to them
+    std::stringstream _out;
 
   //Event Header
   // 1 number of particles
@@ -34,7 +34,7 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
   // 8 Interacted nucleon id 2212 or 2112 (UD)
   // 9 Process ID (UD)
   // 10 Event weight (UD)
-  cout << (int)part4Vect->size() << "\t"
+  _out << (int)part4Vect->size() << "\t"
        << right << "1" << "\t"
        << right << "1" << "\t"
        << right << "0" << "\t"
@@ -62,7 +62,7 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
   //14 Vertex z (cm)
 
    for (int partl=0;(int)partl<part4Vect->size(); partl++){
-     cout   << right << partl << "\t"
+     _out   << right << partl << "\t"
 	       << right << "0"
                 << setw(6) << right << "1"
                 << setw(14) << right << pdg_ID->at(partl)
@@ -79,18 +79,14 @@ void PrintEvents::WriteLund(vector<TLorentzVector> * part4Vect, vector<int> * pd
                 << endl;
    }
 
+   return _out;
 }
 
 
 stringstream PrintEvents::WriteHEPmc(vector<TLorentzVector> * part4Vect, vector<int> * pdg_ID, vector<TVector3> * vertex){
   //Implementation of functionality to write a HEPMC output file
-  //cout << "THIS IS A TEST: HEPMC file will look like this (redirect to a file stream)" << endl;
 
   std::stringstream _out;
-  //cout << filename << endl;
-  
-  //cout << "E " << part4Vect->size() << " " << part4Vect->size() << endl;
-  //cout << "U GEV CM" << endl;
 
   _out << "E " << part4Vect->size() << " " << part4Vect->size() << endl;
   _out << "U GEV CM" << endl;

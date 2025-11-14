@@ -512,7 +512,9 @@ int main (int argc, char **argv){
       outputKey++;
     }
     if(!OUTTYPE || !outputFileType[outputKey]){
-      cout << "Text based format not specified. Printing to terminal" << endl;
+            if(PrintOutput ==1){
+	      cout << "Text based format not specified. Printing to terminal" << endl;
+	    }
       outputKey=0;
     }
     PrintEvents events;
@@ -521,7 +523,9 @@ int main (int argc, char **argv){
 
     switch ((outputFileType_t) outputKey) {
     case term:
+      if(PrintOutput ==1){
       cout << "Terminal output specified. Events will be displayed to terminal" << endl;
+      }
       break;
     case lund:
       mystring3.append("dat");
@@ -535,9 +539,6 @@ int main (int argc, char **argv){
       out1.open(mystring3);
 	    
       //hepmc file header
-      cout << "HepMC::Version 3.02.03" << endl;
-      cout << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
-
       out1 << "HepMC::Version 3.02.03" << endl;
       out1 << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
 
@@ -1541,7 +1542,9 @@ int main (int argc, char **argv){
 			  events.Write(&part4Vect);
 			  break;
 			case lund:
-			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
 			  break;
 			case hepmc:
 			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
@@ -1658,7 +1661,9 @@ int main (int argc, char **argv){
 			  events.Write(&part4Vect);
 			  break;
 			case lund:
-			  events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
 			  break;
 			case hepmc:
 			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
@@ -1774,7 +1779,6 @@ int main (int argc, char **argv){
 	  break;
 	case hepmc:
 	//close hepmcfile
-	cout << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
 	out1 << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
 	out1.close();
 	break;
