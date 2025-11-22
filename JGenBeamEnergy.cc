@@ -3,10 +3,12 @@
 const double kaonmass=0.49761;
 const double neutronmass=0.93957;
 const double photonmass=0.0;
-const string KaonFile="BeamProfile_kaons.root";
+//const string KaonFile="BeamProfile_kaons.root";
+const string KaonFile="BeamProfile_kaons_2024.root";
 const string NeutronFile="BeamProfile_neutrons.root";
 const string PhotonFile="BeamProfile_photons.root";
-const string histname="BeamProfile";
+//const string histname="BeamProfile";
+const string histname="h24E_1";
 
     // constructor parses -E option
 JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
