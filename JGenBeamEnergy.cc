@@ -4,11 +4,10 @@ const double kaonmass=0.49761;
 const double neutronmass=0.93957;
 const double photonmass=0.0;
 //const string KaonFile="BeamProfile_kaons.root";
-const string KaonFile="BeamProfile_kaons_2024.root";
+const string KaonFile="BeamProfile_kaons.root";
 const string NeutronFile="BeamProfile_neutrons.root";
 const string PhotonFile="BeamProfile_photons.root";
-//const string histname="BeamProfile";
-const string histname="h24E_1";
+const string histname="BeamProfile";
 
     // constructor parses -E option
 JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
@@ -190,6 +189,34 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                             break;
                     }
                 }
+		//specify histogram name (ignored for neutron and photon)
+		else if (narg == 5){// throw XnumberArgument;
+                    switch ((EdistribBeamType_t) jKeyT) {
+                        case kaon:
+                            constructor (kaon, KaonFile, copt[4], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case neutron:
+                            constructor (neutron, NeutronFile, histname, atof(copt[2]), atof(copt[3]));
+                            break;
+                        case photon:
+                            constructor (photon, PhotonFile, histname,  atof(copt[2]), atof(copt[3]));
+                            break;
+                    }
+                }
+		//specify file and histogram name (ignored for neutron and photon)
+		else if (narg == 6){// throw XnumberArgument;
+                    switch ((EdistribBeamType_t) jKeyT) {
+                        case kaon:
+                            constructor (kaon, copt[4], copt[5], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case neutron:
+                            constructor (neutron, NeutronFile, histname, atof(copt[2]), atof(copt[3]));
+                            break;
+                        case photon:
+                            constructor (photon, PhotonFile, histname,  atof(copt[2]), atof(copt[3]));
+                            break;
+                    }
+                }		
 
                 break;
                 
