@@ -1863,6 +1863,8 @@ void PrintUsage (char *processName){
     cout << "\t[particle]:histo \t\tDistribution according to BeamProfile_particle.root file\n";
     cout << "\t[particle]:histo:[x] \t\tDistribution according to BeamProfile_particle.root file. [x] is ignored\n";
     cout << "\t[particle]:histo:[x]:[y] \tDistribution according to BeamProfile_particle.root file between [x] and [y]\n\n";
+    cout << "\t[particle]:histo:[x]:[y]:[histname] \tDistribution according to named histogram ([histname]) in BeamProfile_particle.root file between [x] and [y]. Implemented only for kaons\n\n";
+    cout << "\t[particle]:histo:[x]:[y]:[filename]:[histname] \tDistribution according to named histogram ([histname]) in named root file [filename] between [x] and [y]. Implemented only for kaons\n\n";
     cout << "\tRoot file contains tree named mytree and the following:\n";
     cout << "\tnum_tracks\t int number of tracks (beam+target+generated particles)\n";
     cout << "\tpart4Vect\t vector<TLorentzVector> vector of 4vectors of tracks (beam=part4Vect[0]; target=part4Vect[1]; genpart=part4Vect[...])\n";
