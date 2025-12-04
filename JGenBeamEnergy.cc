@@ -189,31 +189,32 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                             break;
                     }
                 }
-		//specify histogram name (ignored for neutron and photon)
+		//specify histogram name
 		else if (narg == 5){// throw XnumberArgument;
                     switch ((EdistribBeamType_t) jKeyT) {
                         case kaon:
                             constructor (kaon, KaonFile, copt[4], atof(copt[2]), atof(copt[3]));
                             break;
                         case neutron:
-                            constructor (neutron, NeutronFile, histname, atof(copt[2]), atof(copt[3]));
+                            constructor (neutron, NeutronFile, copt[4], atof(copt[2]), atof(copt[3]));
                             break;
                         case photon:
-                            constructor (photon, PhotonFile, histname,  atof(copt[2]), atof(copt[3]));
+                            constructor (photon, PhotonFile, copt[4],  atof(copt[2]), atof(copt[3]));
                             break;
                     }
                 }
-		//specify file and histogram name (ignored for neutron and photon)
+		//specify file and histogram name
 		else if (narg == 6){// throw XnumberArgument;
                     switch ((EdistribBeamType_t) jKeyT) {
                         case kaon:
+			  //cout << "Sampling " << copt[5] << " from " << copt[4] << endl;
                             constructor (kaon, copt[4], copt[5], atof(copt[2]), atof(copt[3]));
                             break;
                         case neutron:
-                            constructor (neutron, NeutronFile, histname, atof(copt[2]), atof(copt[3]));
+                            constructor (neutron, copt[4], copt[5], atof(copt[2]), atof(copt[3]));
                             break;
                         case photon:
-                            constructor (photon, PhotonFile, histname,  atof(copt[2]), atof(copt[3]));
+                            constructor (photon, copt[4], copt[5],  atof(copt[2]), atof(copt[3]));
                             break;
                     }
                 }		
