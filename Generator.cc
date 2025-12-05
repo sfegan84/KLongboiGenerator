@@ -26,6 +26,7 @@
 //for HDDM format
 #include "HDDM/hddm_s.hpp"
 #include "particleType.h"
+#include "PrintEvents.h"
 
 #define mass_protPDG 0.93827201
 #define mass_neutPDG 0.939565378
@@ -99,9 +100,10 @@ int main (int argc, char **argv){
     char *ProgName = argv[0];
     char *ROOTFILE = NULL;
     char *REACTION = NULL;
+    char *OUTTYPE = NULL;
     char *OBS = NULL;
     int WillBeRootOutput = 0;
-    int PrintEvents=0;
+	int PrintOutput = 0;
     int c;
     int max = 1;
     TString StLocation="./XSections/";
@@ -138,7 +140,9 @@ int main (int argc, char **argv){
                 REACTION = optarg;
                 break;
             case 'P':
-                PrintEvents = 1;
+		cout << "Events will be printed to terminal or text based file format as specified" << endl;
+                PrintOutput = 1;
+		OUTTYPE = optarg;
                 break;
             case 'E':
                 beamE = new JGenBeamEnergy(optarg);   //JLA added option -E to generate energy distribution
@@ -242,7 +246,10 @@ int main (int argc, char **argv){
     Double_t w, t, x,y;
     Int_t nlines = 0;
     ifstream in1;
+    ofstream out1; //text-based output
+    stringstream outfilestream;
 
+    
     double maxxs=0.0, maxpy=0.0;
     switch ((keywordObs_t) ObsKey) {
         case nsol:
@@ -495,7 +502,51 @@ int main (int argc, char **argv){
     mytree->Branch("charge",&charge);
     mytree->Branch("vertex",&vertex);
     mytree->Branch("Reaction",Reactionstring,"Reactionstring/C", 1024);
-    
+
+
+    enum outputFileType_t {term,lund,hepmc};
+    char* outputFileType [] = {"term","lund","hepmc",NULL};
+    int outputKey = 0;
+
+    while (OUTTYPE && outputFileType [outputKey] && strcasecmp (outputFileType[outputKey], OUTTYPE)){
+      outputKey++;
+    }
+    if(!OUTTYPE || !outputFileType[outputKey]){
+            if(PrintOutput ==1){
+	      cout << "Text based format not specified. Printing to terminal" << endl;
+	    }
+      outputKey=0;
+    }
+    PrintEvents events;
+    string mystring3;
+    mystring3=mystring.substr(0, mystring.length()-4);
+
+    switch ((outputFileType_t) outputKey) {
+    case term:
+      if(PrintOutput ==1){
+      cout << "Terminal output specified. Events will be displayed to terminal" << endl;
+      }
+      break;
+    case lund:
+      mystring3.append("dat");
+      cout << "Lund format output selected. Events will be written to " << mystring3 << endl;
+      out1.open(mystring3);
+      break;
+    case hepmc:
+      mystring3.append("hepmc");
+      cout << "HepMC format output selected. Events will be written to " << mystring3 << endl;
+      
+      out1.open(mystring3);
+	    
+      //hepmc file header
+      out1 << "HepMC::Version 3.02.03" << endl;
+      out1 << "HepMC::Asciiv3-START_EVENT_LISTING" << endl;
+
+      break;
+
+    }
+
+
     
     switch ((keywordReaction_t) ReactionKey) {
         case kl1:
@@ -1279,7 +1330,7 @@ int main (int argc, char **argv){
     
     if (!ROOTFILE){
         cout<<"File not Specified. Printing generated events on screen"<<endl;
-        PrintEvents=1;
+        PrintOutput=1;
     }
     
     int numberofloops=0;
@@ -1485,13 +1536,29 @@ int main (int argc, char **argv){
                         charge.push_back(1);
                     }
                     
-                    if(PrintEvents){
-                        cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                        <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                        for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
-                            cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                        }
-                        cout<<endl;
+                    if(PrintOutput){
+			switch((outputFileType_t) outputKey){
+			case term:
+			  events.Write(&part4Vect);
+			  break;
+			case lund:
+			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
+			  break;
+			case hepmc:
+			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
+			  break;
+			}
+			
+                        //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
+                        //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
+                        //for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
+                        //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
+                        //}
+                        //cout<<endl;
                     }
                     
                     // Start a new event
@@ -1582,13 +1649,28 @@ int main (int argc, char **argv){
                     vertex.push_back(tempVert);
                 }
                 
-                if(PrintEvents){
-                    cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                    <<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                    for (int fspartl=2;fspartl<num_tracks; fspartl++){
-                        cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                    }
-                    cout<<endl;
+                if(PrintOutput){
+                    //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
+                    //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
+                    //for (int fspartl=2;fspartl<num_tracks; fspartl++){
+                    //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
+                    //}
+                    //cout<<endl;
+			switch((outputFileType_t) outputKey){
+			case term:
+			  events.Write(&part4Vect);
+			  break;
+			case lund:
+			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
+			  break;
+			case hepmc:
+			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+			  out1<<outfilestream.rdbuf();
+			  outfilestream.clear();
+			  break;
+			}
                 }
                 
                 // Start a new event
@@ -1688,7 +1770,21 @@ int main (int argc, char **argv){
     if (WillBeRootOutput){
         RootOut->Write ();
         delete outfile;
-        
+
+	switch ((outputFileType_t) outputKey) {
+	case term:
+	  break;
+	case lund:
+	  out1.close();
+	  break;
+	case hepmc:
+	//close hepmcfile
+	out1 << "HepMC::Asciiv3-END_EVENT_LISTING" << endl;
+	out1.close();
+	break;
+	
+	}
+
     }
     cout << "Number of events processed: " << Nevents << endl;
     return 0;
@@ -1767,6 +1863,8 @@ void PrintUsage (char *processName){
     cout << "\t[particle]:histo \t\tDistribution according to BeamProfile_particle.root file\n";
     cout << "\t[particle]:histo:[x] \t\tDistribution according to BeamProfile_particle.root file. [x] is ignored\n";
     cout << "\t[particle]:histo:[x]:[y] \tDistribution according to BeamProfile_particle.root file between [x] and [y]\n\n";
+    cout << "\t[particle]:histo:[x]:[y]:[histname] \tDistribution according to named histogram ([histname]) in BeamProfile_particle.root file between [x] and [y]. Implemented only for kaons\n\n";
+    cout << "\t[particle]:histo:[x]:[y]:[filename]:[histname] \tDistribution according to named histogram ([histname]) in named root file [filename] between [x] and [y]. Implemented only for kaons\n\n";
     cout << "\tRoot file contains tree named mytree and the following:\n";
     cout << "\tnum_tracks\t int number of tracks (beam+target+generated particles)\n";
     cout << "\tpart4Vect\t vector<TLorentzVector> vector of 4vectors of tracks (beam=part4Vect[0]; target=part4Vect[1]; genpart=part4Vect[...])\n";

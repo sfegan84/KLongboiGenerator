@@ -3,6 +3,7 @@
 const double kaonmass=0.49761;
 const double neutronmass=0.93957;
 const double photonmass=0.0;
+//const string KaonFile="BeamProfile_kaons.root";
 const string KaonFile="BeamProfile_kaons.root";
 const string NeutronFile="BeamProfile_neutrons.root";
 const string PhotonFile="BeamProfile_photons.root";
@@ -188,6 +189,35 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                             break;
                     }
                 }
+		//specify histogram name
+		else if (narg == 5){// throw XnumberArgument;
+                    switch ((EdistribBeamType_t) jKeyT) {
+                        case kaon:
+                            constructor (kaon, KaonFile, copt[4], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case neutron:
+                            constructor (neutron, NeutronFile, copt[4], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case photon:
+                            constructor (photon, PhotonFile, copt[4],  atof(copt[2]), atof(copt[3]));
+                            break;
+                    }
+                }
+		//specify file and histogram name
+		else if (narg == 6){// throw XnumberArgument;
+                    switch ((EdistribBeamType_t) jKeyT) {
+                        case kaon:
+			  //cout << "Sampling " << copt[5] << " from " << copt[4] << endl;
+                            constructor (kaon, copt[4], copt[5], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case neutron:
+                            constructor (neutron, copt[4], copt[5], atof(copt[2]), atof(copt[3]));
+                            break;
+                        case photon:
+                            constructor (photon, copt[4], copt[5],  atof(copt[2]), atof(copt[3]));
+                            break;
+                    }
+                }		
 
                 break;
                 
