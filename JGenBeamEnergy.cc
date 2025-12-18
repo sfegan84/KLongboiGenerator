@@ -4,10 +4,12 @@ const double kaonmass=0.49761;
 const double neutronmass=0.93957;
 const double photonmass=0.0;
 //const string KaonFile="BeamProfile_kaons.root";
-const string KaonFile="BeamProfile_kaons.root";
+const string KaonFile="BeamProfile_kaons_2024.root";
 const string NeutronFile="BeamProfile_neutrons.root";
 const string PhotonFile="BeamProfile_photons.root";
-const string histname="BeamProfile";
+const string KaonHistname="h24E_2";
+const string NeutronHistname="BeamProfile";
+const string PhotonHistname="BeamProfile";
 
     // constructor parses -E option
 JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
@@ -99,7 +101,7 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
         switch ((EdistribBeamType_t) jKeyT) {
             case kaon:
                 if (narg == 1)
-                    constructor (kaon, KaonFile, histname, 0, 12);
+                    constructor (kaon, KaonFile, KaonHistname, 0, 12);
                 else if (narg == 2)
                     constructor (kaon, mono, atof(copt[1]), atof(copt[1]));
                 else if (narg == 3)
@@ -109,7 +111,7 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                 break;
             case neutron:
                 if (narg == 1)
-                    constructor (neutron, NeutronFile, histname, 0,12);
+                    constructor (neutron, NeutronFile, NeutronHistname, 0,12);
                 else if (narg == 2)
                     constructor (neutron, mono, atof(copt[1]), atof(copt[1]));
                 else if (narg == 3)
@@ -119,7 +121,7 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                 break;
             case photon:
                 if (narg == 1)
-                    constructor (photon, PhotonFile, histname, 0,12);
+                    constructor (photon, PhotonFile, PhotonHistname, 0,12);
                 else if (narg == 2)
                     constructor (photon, mono, atof(copt[1]), atof(copt[1]));
                 else if (narg == 3)
@@ -143,9 +145,9 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                 break;
             case histo:
                 if (narg == 1 || narg == 2 )
-                    constructor (kaon, KaonFile, histname, 0, 12);
+                    constructor (kaon, KaonFile, KaonHistname, 0, 12);
                 else if (narg == 3)
-                    constructor (kaon, KaonFile, histname, atof(copt[1]), atof(copt[2]));
+                    constructor (kaon, KaonFile, KaonHistname, atof(copt[1]), atof(copt[2]));
                 else throw XnumberArgument;
                 break;
             default:
@@ -166,26 +168,26 @@ JGenBeamEnergy::JGenBeamEnergy (char * coption_) {
                 if (narg == 2 ||narg == 3){// throw XnumberArgument;
                     switch ((EdistribBeamType_t) jKeyT) {
                         case kaon:
-                            constructor (kaon, KaonFile, histname, 0, 12);
+                            constructor (kaon, KaonFile, KaonHistname, 0, 12);
                             break;
                         case neutron:
-                            constructor (neutron, NeutronFile, histname, 0, 12);
+                            constructor (neutron, NeutronFile, NeutronHistname, 0, 12);
                             break;
                         case photon:
-                            constructor (photon, PhotonFile, histname, 0, 12);
+                            constructor (photon, PhotonFile, PhotonHistname, 0, 12);
                             break;
                     }
                 }
                 else if (narg == 4){// throw XnumberArgument;
                     switch ((EdistribBeamType_t) jKeyT) {
                         case kaon:
-                            constructor (kaon, KaonFile, histname, atof(copt[2]), atof(copt[3]));
+                            constructor (kaon, KaonFile, KaonHistname, atof(copt[2]), atof(copt[3]));
                             break;
                         case neutron:
-                            constructor (neutron, NeutronFile, histname, atof(copt[2]), atof(copt[3]));
+                            constructor (neutron, NeutronFile, NeutronHistname, atof(copt[2]), atof(copt[3]));
                             break;
                         case photon:
-                            constructor (photon, PhotonFile, histname,  atof(copt[2]), atof(copt[3]));
+                            constructor (photon, PhotonFile, PhotonHistname,  atof(copt[2]), atof(copt[3]));
                             break;
                     }
                 }
@@ -266,13 +268,13 @@ JGenBeamEnergy::JGenBeamEnergy(EdistribBeamType_t typeB_, EdistribBeamType_t typ
         case histo:
             switch ((EdistribBeamType_t) typeB_) {
                 case kaon:
-                    constructor (kaon, KaonFile, histname, Emin_, Emax_);
+                    constructor (kaon, KaonFile, KaonHistname, Emin_, Emax_);
                     break;
                 case neutron:
-                    constructor (neutron, NeutronFile, histname, Emin_, Emax_);
+                    constructor (neutron, NeutronFile, NeutronHistname, Emin_, Emax_);
                     break;
                 case photon:
-                    constructor (photon, PhotonFile, histname, Emin_, Emax_);
+                    constructor (photon, PhotonFile, PhotonHistname, Emin_, Emax_);
                     break;
             }
             break;
