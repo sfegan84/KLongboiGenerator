@@ -1,4 +1,5 @@
 #include "JGenBeamEnergy.h"
+#include <TSystem.h>
 
 const double kaonmass=0.49761;
 const double neutronmass=0.93957;
