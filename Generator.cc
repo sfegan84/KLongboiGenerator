@@ -260,7 +260,7 @@ int main (int argc, char **argv){
         case sol2:
             cout<<"Generating sol2"<<endl;
             usesol=1;
-            in1.open("SOL2--KLn-KpXim.dat");
+            in1.open(Form("%s/SOL2--KLn-KpXim.dat",gSystem->Getenv("KLGEN")));
             SolXS = new TGraph2D();
             SolPY = new TGraph2D();
             SolXS->SetName("Sol2_XS");
@@ -282,7 +282,7 @@ int main (int argc, char **argv){
         case sol4:
             cout<<"Generating sol4"<<endl;
             usesol=1;
-            in1.open("SOL4--KLn-KpXim.dat");
+            in1.open(Form("%s/SOL4--KLn-KpXim.dat",gSystem->Getenv("KLGEN")));
             SolXS = new TGraph2D();
             SolPY = new TGraph2D();
             SolXS->SetName("Sol2_XS");
