@@ -187,8 +187,8 @@ int main (int argc, char **argv){
         ReactionKey=0;
     }
     
-    enum keywordObs_t {nsol,sol2,sol4,sol10,sol11,sol12,sol13,sol14,sol15,sol16,solC}; //reaction keyword
-    char* keywordObs [] = {"nsol","sol2","sol4","sol10","sol11","sol12","sol13","sol14","sol15","sol16","solC", NULL }; //reaction keyword
+    enum keywordObs_t {nsol,sol2,sol3,sol4,sol10,sol11,sol12,sol13,sol14,sol15,sol16,solC}; //reaction keyword
+    char* keywordObs [] = {"nsol","sol2","sol3","sol4","sol10","sol11","sol12","sol13","sol14","sol15","sol16","solC", NULL }; //reaction keyword
     int   ObsKey=0;
     while (OBS && keywordObs [ObsKey] && strcasecmp (keywordObs[ObsKey], OBS)) {
         ObsKey++;
@@ -279,6 +279,28 @@ int main (int argc, char **argv){
             maxpy=SolPY->GetMaximum();
             maxxs=0.013;
             break;
+	case sol3:
+	  cout<<"Generating sol3"<<endl;
+          usesol=1;
+          in1.open(Form("%s/KLptoKpXi0_diffX_pol.dat",gSystem->Getenv("KLGEN")));
+          SolXS = new TGraph2D();
+          SolPY = new TGraph2D();
+          SolXS->SetName("Sol2_XS");
+          SolPY->SetName("Sol2_Py");
+          while (1) {
+              in1 >> w>> t>> x >> y;
+              if (!in1.good()) break;
+              if (nlines < 5) printf("w=%8f, t=%8f, x=%8f, y=%8f\n",w,t,x,y);
+              SolXS->SetPoint(nlines, w, t, x);
+              SolPY->SetPoint(nlines, w, t, y/x);
+              nlines++;
+          }
+          printf(" found %d points\n",nlines);
+          in1.close();
+          maxxs=SolXS->GetMaximum();
+          maxpy=SolPY->GetMaximum();
+          maxxs=0.013;
+          break;	    
         case sol4:
             cout<<"Generating sol4"<<endl;
             usesol=1;
