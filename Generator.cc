@@ -620,18 +620,46 @@ int main (int argc, char **argv){
             geant_ID.push_back(G3ID_kaonlong);
             geant_ID.push_back(G3ID_prot);
             geant_ID.push_back(G3ID_kaonplus);
-            geant_ID.push_back(G3ID_casc);
+            //geant_ID.push_back(G3ID_casc);
             pdg_ID.push_back(PDGID_kaonlong);
             pdg_ID.push_back(PDGID_prot);
             pdg_ID.push_back(PDGID_kaonplus);
-            pdg_ID.push_back(PDGID_casc);
+            //pdg_ID.push_back(PDGID_casc);
             charge.push_back(0);
             charge.push_back(1);
             charge.push_back(1);
-            charge.push_back(0);
+	    //charge.push_back(0);
+	    if (usesol==1){
+	      if(Cocktail==false){
+		geant_ID.push_back(G3ID_pizero);
+		geant_ID.push_back(G3ID_lambd);
+		charge.push_back(0);
+		charge.push_back(0);
+		pdg_ID.push_back(PDGID_pizero);
+		pdg_ID.push_back(PDGID_lambd);
+		mytree->Branch("cs",&cs);
+		mytree->Branch("poly",&poly);
+		mytree->Branch("costhetaK",&costhetaK);
+		mytree->Branch("W",&Wval);
+		mytree->Branch("costhetaPi",&costhetaPi);
+	      }
+	    }
+	    else {
+	      geant_ID.push_back(G3ID_casc);
+	      charge.push_back(0);
+	      pdg_ID.push_back(PDGID_casc);
+	    }
             FSmasses=new double[num_tracks-2];
             FSmasses[0]=mass_kaonplusPDG;
             FSmasses[1]=mass_cascPDG;
+	    
+	    if (usesol==1){
+	      if(Cocktail==false){
+                FSmasses1=new double[2];
+                FSmasses1[0]=mass_pizeroPDG;
+                FSmasses1[1]=mass_lambdPDG;
+	      }
+            }
 	    cascade0gen = true;
             break;
         case kl4:
@@ -993,7 +1021,7 @@ int main (int argc, char **argv){
                 geant_ID.push_back(G3ID_lambd);
                 charge.push_back(-1);
                 charge.push_back(0);
-                pdg_ID.push_back(PDGID_pizero);
+                pdg_ID.push_back(PDGID_pizero);//this should be piminus
                 pdg_ID.push_back(PDGID_lambd);
                 mytree->Branch("cs",&cs);
                 mytree->Branch("poly",&poly);
@@ -1341,7 +1369,7 @@ int main (int argc, char **argv){
         lifetimef1->SetParameter(0, 0.1639);
     }
 
-    if (cascade0gen && usesol==1){//may need different parameterisation of hyperon decy, for now reuse charged mode
+    if (cascade0gen && usesol==1){//may need different parameterisation of Cascade decay, for now reuse charged mode
         lifetimef1=new TF1("lifetimef1","TMath::Exp(-x/([0]*[1]))",0, 5); //in ns tau= 2.9E-10
         lifetimef1->SetParameter(0, 0.1639);
     }
@@ -1371,8 +1399,8 @@ int main (int argc, char **argv){
     TLorentzVector deuteron, starget;
     deuteron.SetXYZT(0,0,0,1.87561);
     
-    //if (usesol==1 && (!cascadegen || !cascade0gen)){
-    if (usesol==1 && !cascadegen){
+    if (usesol==1 && (!cascadegen && !cascade0gen)){
+    //if (usesol==1 && !cascadegen){
         cout<<"No polarised cross-section for reaction chosen. Generating Phase space."<<endl;
     }
     
@@ -1419,7 +1447,7 @@ int main (int argc, char **argv){
             vertex.push_back(tempVert);
 
 	    
-            weight = eventPS.Generate ();
+            weight = eventPS.Generate();
 	    XS_weight=1;
 
 
@@ -1427,56 +1455,48 @@ int main (int argc, char **argv){
 	    if(Sol10==true||Sol11==true||Sol12==true||Sol13==true||Sol14==true||Sol15==true||Sol16==true){
 	      TLorentzVector cms, pp1,pp2,pp3,pp23,pp1D,pp2D,pp3D;
 	      double costhetaXS,costhetaXS1,PXS, DD_weight, Th_weight;
-	       temp4vect=beamE->GetP4();
+	      temp4vect=beamE->GetP4();
 	      PXS=temp4vect.P();
-		cms=W;
-		temp4vectpoint=eventPS.GetDecay(0);
-                temp4vect = *temp4vectpoint;
-		 part4Vect.push_back(temp4vect);
-		 pp1=temp4vect;
-                 pp1.Boost(-cms.BoostVector());
-
-		 temp4vectpoint=eventPS.GetDecay(1);
-                 temp4vect = *temp4vectpoint;
-		 part4Vect.push_back(temp4vect);
-		 pp2=temp4vect;
-                 pp2.Boost(-cms.BoostVector());
-
-		 temp4vectpoint=eventPS.GetDecay(2);
-                 temp4vect = *temp4vectpoint;
-		 part4Vect.push_back(temp4vect);
-		 pp3=temp4vect;
-                 pp3.Boost(-cms.BoostVector());
-
-		 costhetaXS=TMath::Cos(pp1.Theta());
- 		 XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
-
-		 pp23=pp2+pp3;
-		 pp1D=pp1;
-                 pp1D.Boost(-pp23.BoostVector());
-
-		 pp2D=pp2;
-                 pp2D.Boost(-pp23.BoostVector());
-
-		 pp3D=pp1;
-                 pp3D.Boost(-pp23.BoostVector());
-		 
-
-		
-		 
-		 DD_weight=0.12/4/((pp23.M()-1.232)*(pp23.M()-1.232)+0.12*0.12/4);
-		 Th_weight=(1+3*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P())*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P()))/4;
-		 XS_weight=XS_weight*DD_weight*Th_weight;
+	      cms=W;
+	      temp4vectpoint=eventPS.GetDecay(0);
+	      temp4vect = *temp4vectpoint;
+	      part4Vect.push_back(temp4vect);
+	      pp1=temp4vect;
+	      pp1.Boost(-cms.BoostVector());
+	      
+	      temp4vectpoint=eventPS.GetDecay(1);
+	      temp4vect = *temp4vectpoint;
+	      part4Vect.push_back(temp4vect);
+	      pp2=temp4vect;
+	      pp2.Boost(-cms.BoostVector());
+	      
+	      temp4vectpoint=eventPS.GetDecay(2);
+	      temp4vect = *temp4vectpoint;
+	      part4Vect.push_back(temp4vect);
+	      pp3=temp4vect;
+	      pp3.Boost(-cms.BoostVector());
+	      
+	      costhetaXS=TMath::Cos(pp1.Theta());
+	      XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+	      
+	      pp23=pp2+pp3;
+	      pp1D=pp1;
+	      pp1D.Boost(-pp23.BoostVector());
+	      
+	      pp2D=pp2;
+	      pp2D.Boost(-pp23.BoostVector());
+	      
+	      pp3D=pp1;
+	      pp3D.Boost(-pp23.BoostVector());
+	      
+	      
+	      DD_weight=0.12/4/((pp23.M()-1.232)*(pp23.M()-1.232)+0.12*0.12/4);
+	      Th_weight=(1+3*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P())*((pp1D.Px()*pp2D.Px()+pp1D.Py()*pp2D.Py()+pp1D.Pz()*pp2D.Pz())/pp1D.P()/pp2D.P()))/4;
+	      XS_weight=XS_weight*DD_weight*Th_weight;
 	    }
 
 	    if ((Sol10||Sol11||Sol12||Sol13==true||Sol14==true||Sol15==true||Sol16==true) && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions.
-                continue;
-
-
-
-	 
-
-
+	      continue;
 	    
 	    
 	    if(usesol==1 && Cocktail== true){
@@ -1484,347 +1504,350 @@ int main (int argc, char **argv){
               double costhetaXS,PXS;
 	      temp4vect=beamE->GetP4();
 	      PXS=temp4vect.P();
-		cms=W;
-
+	      cms=W;
 		
-
-
-
-		
-	        temp4vectpoint=eventPS.GetDecay(0);
-                temp4vect = *temp4vectpoint;
-		 part4Vect.push_back(temp4vect);
-		 Mesoncms=temp4vect;
-                 Mesoncms.Boost(-cms.BoostVector());
-                 costhetaXS=TMath::Cos(Mesoncms.Theta());
-		 //		 weight=weight*(double(hXSection->Interpolate(PXS,costhetaXS)));
-		XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
-		for (int fspartl=1;fspartl<num_tracks-2; fspartl++){
-                        temp4vectpoint=eventPS.GetDecay(fspartl);
-                        temp4vect = *temp4vectpoint;
-                        part4Vect.push_back(temp4vect);                    
-                    }
-		}
+	      temp4vectpoint=eventPS.GetDecay(0);
+	      temp4vect = *temp4vectpoint;
+	      part4Vect.push_back(temp4vect);
+	      Mesoncms=temp4vect;
+	      Mesoncms.Boost(-cms.BoostVector());
+	      costhetaXS=TMath::Cos(Mesoncms.Theta());
+	      //		 weight=weight*(double(hXSection->Interpolate(PXS,costhetaXS)));
+	      XS_weight=(double(hXSection->Interpolate(PXS,costhetaXS)));
+	      for (int fspartl=1;fspartl<num_tracks-2; fspartl++){
+		temp4vectpoint=eventPS.GetDecay(fspartl);
+		temp4vect = *temp4vectpoint;
+		part4Vect.push_back(temp4vect);                    
+	      }
+	    }
             //cout<<"Max weight: "<<eventPS.GetWtMax()<<endl;
 	    //	    if (Cocktail && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
-	       if (Cocktail && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions for events with more than 2 FS particles.
-                continue;
-	       //            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
-	       //                continue;
+	    if (Cocktail && (randomNum.Uniform(0,XS_weight_Max)>XS_weight)) // to produce flat distributions for events with more than 2 FS particles.
+	      continue;
+	    //            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
+	    //                continue;
             
             if (usesol==1 && cascadegen){
-                TLorentzVector cms, Kaoncms;
-                double costheta, trueW;
-                double evalxs=0.0;
-                double evalpy=0.0;
-                temp4vectpoint=eventPS.GetDecay(0);
-                temp4vect = *temp4vectpoint;
-                //Kaon
-                part4Vect.push_back(temp4vect);
-                vertex.push_back(tempVert);
+	      TLorentzVector cms, Kaoncms;
+	      double costheta, trueW;
+	      double evalxs=0.0;
+	      double evalpy=0.0;
+	      temp4vectpoint=eventPS.GetDecay(0);
+	      temp4vect = *temp4vectpoint;
+	      //Kaon
+	      part4Vect.push_back(temp4vect);
+	      vertex.push_back(tempVert);
+              
+	      cms=W;
+	      trueW=W.M();
+	      Wval=trueW;
+	      Kaoncms=temp4vect;
+	      Kaoncms.Boost(-cms.BoostVector());
+	      costheta=TMath::Cos(Kaoncms.Theta());
+	      costhetaK=costheta;
+	      evalxs=SolXS->Interpolate(trueW,costheta);
+	      cs=evalxs;
+	      runtemp=randomNum.Uniform(0,maxxs);
+	      if (runtemp>evalxs){
+		continue;
+	      }
+	      W=*eventPS.GetDecay(1);
+	      if (lifetimef1 && eventPS1.SetDecay(W, 2, FSmasses1)){
+		weight = eventPS1.Generate();
+		gammaval=eventPS.GetDecay(1)->Gamma();
+		lifetimef1->SetParameter(1,gammaval);
+		lifetime=lifetimef1->GetRandom(0,5.0);
+		beta=eventPS.GetDecay(1)->BoostVector();
+		tempVert2=tempVert+29.9792*lifetime*beta;
+		pizero4vec=*eventPS1.GetDecay(0);
+		pizero4vec.Boost(-beta);
+		yaxis=eventPS.GetDecay(1)->Vect().Cross(zaxis);
+		piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
+		runtemp=randomNum.Uniform(0,1.50);
+		evalpy=SolPY->Interpolate(trueW,costheta);
+		poly=evalpy;
+		if(runtemp>(1+evalpy*0.458*piontheta)){
+		  continue;
+		}
+		for (int fspartl=0;fspartl<2; fspartl++){
+		  temp4vectpoint=eventPS1.GetDecay(fspartl);
+		  temp4vect = *temp4vectpoint;
+		  part4Vect.push_back(temp4vect);
+		  vertex.push_back(tempVert2);
+		}
+		if (fermi==1){
+		  part4Vect.push_back(starget);
+		  geant_ID.push_back(G3ID_prot);
+		  pdg_ID.push_back(PDGID_prot);
+		  charge.push_back(1);
+		}
                 
-                cms=W;
-                trueW=W.M();
-                Wval=trueW;
-                Kaoncms=temp4vect;
-                Kaoncms.Boost(-cms.BoostVector());
-                costheta=TMath::Cos(Kaoncms.Theta());
-                costhetaK=costheta;
-                evalxs=SolXS->Interpolate(trueW,costheta);
-                cs=evalxs;
-                runtemp=randomNum.Uniform(0,maxxs);
-                if (runtemp>evalxs){
-                    continue;
-                }
-                W=*eventPS.GetDecay(1);
-                if (lifetimef1 && eventPS1.SetDecay(W, 2, FSmasses1)){
-                    weight = eventPS1.Generate();
-                    gammaval=eventPS.GetDecay(1)->Gamma();
-                    lifetimef1->SetParameter(1,gammaval);
-                    lifetime=lifetimef1->GetRandom(0,5.0);
-                    beta=eventPS.GetDecay(1)->BoostVector();
-                    tempVert2=tempVert+29.9792*lifetime*beta;
-                    pizero4vec=*eventPS1.GetDecay(0);
-                    pizero4vec.Boost(-beta);
-                    yaxis=eventPS.GetDecay(1)->Vect().Cross(zaxis);
-                    piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
-                    runtemp=randomNum.Uniform(0,1.50);
-                    evalpy=SolPY->Interpolate(trueW,costheta);
-                    poly=evalpy;
-                    if(runtemp>(1+evalpy*0.458*piontheta)){
-                        continue;
-                    }
-                    for (int fspartl=0;fspartl<2; fspartl++){
-                        temp4vectpoint=eventPS1.GetDecay(fspartl);
-                        temp4vect = *temp4vectpoint;
-                        part4Vect.push_back(temp4vect);
-                        vertex.push_back(tempVert2);
-                    }
-                    if (fermi==1){
-                        part4Vect.push_back(starget);
-                        geant_ID.push_back(G3ID_prot);
-                        pdg_ID.push_back(PDGID_prot);
-                        charge.push_back(1);
-                    }
-                    
-                    if(PrintOutput){
-			switch((outputFileType_t) outputKey){
-			case term:
-			  events.Write(&part4Vect);
-			  break;
-			case lund:
-			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
-			  out1<<outfilestream.rdbuf();
-			  outfilestream.clear();
-			  break;
-			case hepmc:
-			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
-			  out1<<outfilestream.rdbuf();
-			  outfilestream.clear();
-			  break;
-			}
-			
-                        //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                        //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                        //for (int fspartl=2;fspartl<part4Vect.size(); fspartl++){
-                        //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                        //}
-                        //cout<<endl;
-                    }
-                    
-                    // Start a new event
-                    hddm_s::HDDM record;
-                    hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
-                    pes().setRunNo(runNumber);
-                    pes().setEventNo(Nevents); //event number
-                    hddm_s::ReactionList rs = pes().addReactions();
-                    hddm_s::TargetList ts = rs().addTargets();
-                    ts().setType(targetType);
-                    hddm_s::PropertiesList tpros = ts().addPropertiesList();
-                    tpros().setCharge(ParticleCharge(targetType));
-                    tpros().setMass(ParticleMass(targetType));
-                    hddm_s::MomentumList tmoms = ts().addMomenta();
+		if(PrintOutput){
+		  switch((outputFileType_t) outputKey){
+		  case term:
+		    events.Write(&part4Vect);
+		    break;
+		  case lund:
+		    outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+		    out1<<outfilestream.rdbuf();
+		    outfilestream.clear();
+		    break;
+		  case hepmc:
+		    outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+		    out1<<outfilestream.rdbuf();
+		    outfilestream.clear();
+		    break;
+		  }
+		  
+		}
+                
+		// Start a new event
+		hddm_s::HDDM record;
+		hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
+		pes().setRunNo(runNumber);
+		pes().setEventNo(Nevents); //event number
+		hddm_s::ReactionList rs = pes().addReactions();
+		hddm_s::TargetList ts = rs().addTargets();
+		ts().setType(targetType);
+		hddm_s::PropertiesList tpros = ts().addPropertiesList();
+		tpros().setCharge(ParticleCharge(targetType));
+		tpros().setMass(ParticleMass(targetType));
+		hddm_s::MomentumList tmoms = ts().addMomenta();
                     
                     
                     
-					// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
-					// (the front face of the spectrometer)
-					// currently assuming that the distance between the center of the KPT target and the front
-					// of the spectrometer is 24 m, and the KPT has a length of 40 cm
-					// so set the event time based on that, assuming the kaons are moving purely in the z-direction
-					// note that standard GlueX units are cm and ns
-					double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
-					if(SIMULATE_BEAM_TIMING) {
-						double z_production = 0.;
-						if(SIMULATE_KPT_THICKNESS) 
-							z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
-						double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
-						event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;
-						
-						if(BLEED_THROUGH_MODE) {
-							// shift by some number of beam bunches
-							double beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
-							event_time += beam_bucket*BEAM_BUNCH_SEPARATION;
-						}
-					}
-                    
-                    tmoms().setPx(0);
-                    tmoms().setPy(0);
-                    tmoms().setPz(0);
-                    tmoms().setE(ParticleMass(targetType));
-                    hddm_s::BeamList bs = rs().addBeams();
-                    bs().setType(beamType);
-                    
-                    hddm_s::PropertiesList bpros = bs().addPropertiesList();
-                    bpros().setCharge(ParticleCharge(beamType));
-                    bpros().setMass(ParticleMass(beamType));
-                    hddm_s::MomentumList bmoms = bs().addMomenta();
-                    bmoms().setPx(part4Vect.at(0).Px());
-                    bmoms().setPy(part4Vect.at(0).Py());
-                    bmoms().setPz(part4Vect.at(0).Pz());
-                    bmoms().setE(part4Vect.at(0).E());
-                    
-                    hddm_s::VertexList vs = rs().addVertices();
-                    hddm_s::OriginList os = vs().addOrigins();
-                    hddm_s::ProductList ps = vs().addProducts(part4Vect.size()-2);
-                    
-                    os().setT(event_time);
-                    os().setVx(vertex.at(0).X());
-                    os().setVy(vertex.at(0).Y());
-                    os().setVz(vertex.at(0).Z());
-                    for (int i=2; i < part4Vect.size(); i++) {
-                        ps(i-2).setType((Particle_t) geant_ID[i]);
-                        ps(i-2).setPdgtype(pdg_ID[i]);
-                        ps(i-2).setId(i-1);         // unique value for this particle within the event
-                        ps(i-2).setParentid(0);     // All internally generated particles have no parent
-                        ps(i-2).setMech(0);       //   maybe this should be set to something?
-                        
-                        hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
-                        pmoms().setPx(part4Vect.at(i).Px());
-                        pmoms().setPy(part4Vect.at(i).Py());
-                        pmoms().setPz(part4Vect.at(i).Pz());
-                        pmoms().setE(part4Vect.at(i).E());
-                    }
-                    if (WillBeRootOutput){
-                        mytree->Fill ();
-                        *outstream << record;
-                    }
-                    Nevents++;
-                }
+		// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
+		// (the front face of the spectrometer)
+		// currently assuming that the distance between the center of the KPT target and the front
+		// of the spectrometer is 24 m, and the KPT has a length of 40 cm
+		// so set the event time based on that, assuming the kaons are moving purely in the z-direction
+		// note that standard GlueX units are cm and ns
+		double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
+		if(SIMULATE_BEAM_TIMING) {
+		  double z_production = 0.;
+		  if(SIMULATE_KPT_THICKNESS) 
+		    z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
+		  double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
+		  event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;
+		  
+		  if(BLEED_THROUGH_MODE) {
+		    // shift by some number of beam bunches
+		    double beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
+		    event_time += beam_bucket*BEAM_BUNCH_SEPARATION;
+		  }
+		}
+		
+		
+		
+		tmoms().setPx(0);
+		tmoms().setPy(0);
+		tmoms().setPz(0);
+		tmoms().setE(ParticleMass(targetType));
+		hddm_s::BeamList bs = rs().addBeams();
+		bs().setType(beamType);
+                
+		hddm_s::PropertiesList bpros = bs().addPropertiesList();
+		bpros().setCharge(ParticleCharge(beamType));
+		bpros().setMass(ParticleMass(beamType));
+		hddm_s::MomentumList bmoms = bs().addMomenta();
+		bmoms().setPx(part4Vect.at(0).Px());
+		bmoms().setPy(part4Vect.at(0).Py());
+		bmoms().setPz(part4Vect.at(0).Pz());
+		bmoms().setE(part4Vect.at(0).E());
+                
+		hddm_s::VertexList vs = rs().addVertices();
+		hddm_s::OriginList os = vs().addOrigins();
+		hddm_s::ProductList ps = vs().addProducts(part4Vect.size()-2);
+                
+		os().setT(event_time);
+		os().setVx(vertex.at(0).X());
+		os().setVy(vertex.at(0).Y());
+		os().setVz(vertex.at(0).Z());
+		for (int i=2; i < part4Vect.size(); i++) {
+		  ps(i-2).setType((Particle_t) geant_ID[i]);
+		  ps(i-2).setPdgtype(pdg_ID[i]);
+		  ps(i-2).setId(i-1);         // unique value for this particle within the event
+		  ps(i-2).setParentid(0);     // All internally generated particles have no parent
+		  ps(i-2).setMech(0);       //   maybe this should be set to something?
+                  
+		  hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
+		  pmoms().setPx(part4Vect.at(i).Px());
+		  pmoms().setPy(part4Vect.at(i).Py());
+		  pmoms().setPz(part4Vect.at(i).Pz());
+		  pmoms().setE(part4Vect.at(i).E());
+		}
+		if (WillBeRootOutput){
+		  mytree->Fill ();
+		  *outstream << record;
+		}
+		Nevents++;
+	      }
             }
-	    // if (usesol==1 && cascade0gen){
-            //     TLorentzVector cms, Kaoncms;
-            //     double costheta, trueW;
-            //     double evalxs=0.0;
-            //     double evalpy=0.0;
-            //     temp4vectpoint=eventPS.GetDecay(0);
-            //     temp4vect = *temp4vectpoint;
-            //     //Kaon
-            //     part4Vect.push_back(temp4vect);
-            //     vertex.push_back(tempVert);
+	    else if (usesol==1 && cascade0gen){
+	      TLorentzVector cms, Kaoncms;
+	      double costheta, trueW;
+	      double evalxs=0.0;
+	      double evalpy=0.0;
+	      temp4vectpoint=eventPS.GetDecay(0);
+	      temp4vect = *temp4vectpoint;
+	      //Kaon
+	      part4Vect.push_back(temp4vect);
+	      vertex.push_back(tempVert);
+	      
+	      cms=W;
+	      
+	      //true W in this case needs to be Xi^{0} cm momentum
+	      trueW=W.M();
+	      
+	      Wval=trueW;
+	      Kaoncms=temp4vect;
+	      Kaoncms.Boost(-cms.BoostVector());
+	      costheta=TMath::Cos(Kaoncms.Theta());
+	      costhetaK=costheta;
+	      evalxs=SolXS->Interpolate(trueW,costheta);
+	      cs=evalxs;
+	      runtemp=randomNum.Uniform(0,maxxs);
+	      if (runtemp>evalxs){
+		continue;
+	      }
+	      
+	      W=*eventPS.GetDecay(1);
+	      if (lifetimef1 && eventPS1.SetDecay(W, 2, FSmasses1)){
+		weight = eventPS1.Generate();
+		gammaval=eventPS.GetDecay(1)->Gamma();
+		lifetimef1->SetParameter(1,gammaval);
+		lifetime=lifetimef1->GetRandom(0,5.0);
+		beta=eventPS.GetDecay(1)->BoostVector();
+		tempVert2=tempVert+29.9792*lifetime*beta;
+		pizero4vec=*eventPS1.GetDecay(0);
+		pizero4vec.Boost(-beta);
+		yaxis=eventPS.GetDecay(1)->Vect().Cross(zaxis);
+		piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
+		runtemp=randomNum.Uniform(0,1.50);
+		evalpy=SolPY->Interpolate(trueW,costheta);
+		//evalpy=0.01;
+		poly=evalpy;
+		if(runtemp>(1+evalpy*0.458*piontheta)){
+		  continue;
+		}
+		for (int fspartl=0;fspartl<2; fspartl++){
+		  temp4vectpoint=eventPS1.GetDecay(fspartl);
+		  temp4vect = *temp4vectpoint;
+		  part4Vect.push_back(temp4vect);
+		  vertex.push_back(tempVert2);
+		}
+		// for (int fspartl=0;fspartl<num_tracks-2; fspartl++){
+		//       temp4vectpoint=eventPS.GetDecay(fspartl);
+		//       temp4vect = *temp4vectpoint;
+		//       part4Vect.push_back(temp4vect);
+		//       vertex.push_back(tempVert);
+		//   }
                 
-            //     cms=W;
-            //     trueW=W.M();
-            //     Wval=trueW;
-            //     Kaoncms=temp4vect;
-            //     Kaoncms.Boost(-cms.BoostVector());
-            //     costheta=TMath::Cos(Kaoncms.Theta());
-            //     costhetaK=costheta;
-            //     evalxs=SolXS->Interpolate(trueW,costheta);
-            //     cs=evalxs;
-            //     runtemp=randomNum.Uniform(0,maxxs);
-            //     if (runtemp>evalxs){
-            //         continue;
-            //     }
-            //     W=*eventPS.GetDecay(1);
-            //     if (lifetimef1 && eventPS1.SetDecay(W, 2, FSmasses1)){
-            //         weight = eventPS1.Generate();
-            //         gammaval=eventPS.GetDecay(1)->Gamma();
-            //         lifetimef1->SetParameter(1,gammaval);
-            //         lifetime=lifetimef1->GetRandom(0,5.0);
-            //         beta=eventPS.GetDecay(1)->BoostVector();
-            //         tempVert2=tempVert+29.9792*lifetime*beta;
-            //         pizero4vec=*eventPS1.GetDecay(0);
-            //         pizero4vec.Boost(-beta);
-            //         yaxis=eventPS.GetDecay(1)->Vect().Cross(zaxis);
-            //         piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
-            //         runtemp=randomNum.Uniform(0,1.50);
-            //         evalpy=SolPY->Interpolate(trueW,costheta);
-            //         poly=evalpy;
-            //         if(runtemp>(1+evalpy*0.458*piontheta)){
-            //             continue;
-            //         }
-            //         for (int fspartl=0;fspartl<2; fspartl++){
-            //             temp4vectpoint=eventPS1.GetDecay(fspartl);
-            //             temp4vect = *temp4vectpoint;
-            //             part4Vect.push_back(temp4vect);
-            //             vertex.push_back(tempVert2);
-            //         }
-            ////         if (fermi==1){
-            ////             part4Vect.push_back(starget);
-            ////             geant_ID.push_back(G3ID_prot);
-            ////             pdg_ID.push_back(PDGID_prot);
-            ////             charge.push_back(1);
-            ////         }
+                if(PrintOutput){
+		  switch((outputFileType_t) outputKey){
+		  case term:
+		    events.Write(&part4Vect);
+		    break;
+		  case lund:
+		    outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+		    out1<<outfilestream.rdbuf();
+		    outfilestream.clear();
+		    break;
+		  case hepmc:
+		    outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+		    out1<<outfilestream.rdbuf();
+		    outfilestream.clear();
+		    break;
+		  }
+                }
+	      }
+                // Start a new event
+                hddm_s::HDDM record;                
+                hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
+                
+                pes().setRunNo(runNumber);
+                pes().setEventNo(Nevents); //event number
+                
+                hddm_s::ReactionList rs = pes().addReactions();
+                hddm_s::TargetList ts = rs().addTargets();
+                ts().setType(targetType);
+                hddm_s::PropertiesList tpros = ts().addPropertiesList();
+                tpros().setCharge(ParticleCharge(targetType));
+                tpros().setMass(ParticleMass(targetType));
+                hddm_s::MomentumList tmoms = ts().addMomenta();
+
+                
+				// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
+				// (the front face of the spectrometer)
+				// currently assuming that the distance between the center of the KPT target and the front
+				// of the spectrometer is 24 m, and the KPT has a length of 40 cm
+				// so set the event time based on that, assuming the kaons are moving purely in the z-direction
+				// note that standard GlueX units are cm and ns
+				double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
+				if(SIMULATE_BEAM_TIMING) {
+					double z_production = 0.;
+					if(SIMULATE_KPT_THICKNESS) 
+						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
+					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
+					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
+					
+					if(BLEED_THROUGH_MODE) {
+						// shift by some number of beam bunches
+						int beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
+						event_time += static_cast<double>(beam_bucket)*BEAM_BUNCH_SEPARATION;
+					}
+				}
+				
+                tmoms().setPx(0);
+                tmoms().setPy(0);
+                tmoms().setPz(0);
+                tmoms().setE(ParticleMass(targetType));
+                hddm_s::BeamList bs = rs().addBeams();
+                bs().setType(beamType);
+                
+                hddm_s::PropertiesList bpros = bs().addPropertiesList();
+                bpros().setCharge(ParticleCharge(beamType));
+                bpros().setMass(ParticleMass(beamType));
+                hddm_s::MomentumList bmoms = bs().addMomenta();
+                bmoms().setPx(part4Vect.at(0).Px());
+                bmoms().setPy(part4Vect.at(0).Py());
+                bmoms().setPz(part4Vect.at(0).Pz());
+                bmoms().setE(part4Vect.at(0).E());
+                
+                hddm_s::VertexList vs = rs().addVertices();
+                hddm_s::OriginList os = vs().addOrigins();
+                hddm_s::ProductList ps = vs().addProducts(num_tracks-2);
+                
+                os().setT(event_time);
+                os().setVx(vertex.at(0).X());
+                os().setVy(vertex.at(0).Y());
+                os().setVz(vertex.at(0).Z());
+                
+
+		//for (int i=2; i < part4Vect.size(); i++) {
+                for (int i=2; i < num_tracks; i++) {
                     
-            //         if(PrintOutput){
-	    // 		switch((outputFileType_t) outputKey){
-	    // 		case term:
-	    // 		  events.Write(&part4Vect);
-	    // 		  break;
-	    // 		case lund:
-	    // 		  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
-	    // 		  out1<<outfilestream.rdbuf();
-	    // 		  outfilestream.clear();
-	    // 		  break;
-	    // 		case hepmc:
-	    // 		  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
-	    // 		  out1<<outfilestream.rdbuf();
-	    // 		  outfilestream.clear();
-	    // 		  break;
-	    // 		}
-            //         }
+                    ps(i-2).setType((Particle_t) geant_ID[i]);
+                    ps(i-2).setPdgtype(pdg_ID[i]);
+                    ps(i-2).setId(i-1);         // unique value for this particle within the event
+                    ps(i-2).setParentid(0);     // All internally generated particles have no parent
+                    ps(i-2).setMech(0);       //   maybe this should be set to something?
                     
-            //         // Start a new event
-            //         hddm_s::HDDM record;
-            //         hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
-            //         pes().setRunNo(runNumber);
-            //         pes().setEventNo(Nevents); //event number
-            //         hddm_s::ReactionList rs = pes().addReactions();
-            //         hddm_s::TargetList ts = rs().addTargets();
-            //         ts().setType(targetType);
-            //         hddm_s::PropertiesList tpros = ts().addPropertiesList();
-            //         tpros().setCharge(ParticleCharge(targetType));
-            //         tpros().setMass(ParticleMass(targetType));
-            //         hddm_s::MomentumList tmoms = ts().addMomenta();
+                    hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
                     
+                    pmoms().setPx(part4Vect.at(i).Px());
+                    pmoms().setPy(part4Vect.at(i).Py());
+                    pmoms().setPz(part4Vect.at(i).Pz());
+                    pmoms().setE(part4Vect.at(i).E());
                     
-                    
-	    // 				// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
-	    // 				// (the front face of the spectrometer)
-	    // 				// currently assuming that the distance between the center of the KPT target and the front
-	    // 				// of the spectrometer is 24 m, and the KPT has a length of 40 cm
-	    // 				// so set the event time based on that, assuming the kaons are moving purely in the z-direction
-	    // 				// note that standard GlueX units are cm and ns
-	    // 				double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
-	    // 				if(SIMULATE_BEAM_TIMING) {
-	    // 					double z_production = 0.;
-	    // 					if(SIMULATE_KPT_THICKNESS) 
-	    // 						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
-	    // 					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
-	    // 					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;
-						
-	    // 					if(BLEED_THROUGH_MODE) {
-	    // 						// shift by some number of beam bunches
-	    // 						double beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
-	    // 						event_time += beam_bucket*BEAM_BUNCH_SEPARATION;
-	    // 					}
-	    // 				}
-                    
-            //         tmoms().setPx(0);
-            //         tmoms().setPy(0);
-            //         tmoms().setPz(0);
-            //         tmoms().setE(ParticleMass(targetType));
-            //         hddm_s::BeamList bs = rs().addBeams();
-            //         bs().setType(beamType);
-                    
-            //         hddm_s::PropertiesList bpros = bs().addPropertiesList();
-            //         bpros().setCharge(ParticleCharge(beamType));
-            //         bpros().setMass(ParticleMass(beamType));
-            //         hddm_s::MomentumList bmoms = bs().addMomenta();
-            //         bmoms().setPx(part4Vect.at(0).Px());
-            //         bmoms().setPy(part4Vect.at(0).Py());
-            //         bmoms().setPz(part4Vect.at(0).Pz());
-            //         bmoms().setE(part4Vect.at(0).E());
-                    
-            //         hddm_s::VertexList vs = rs().addVertices();
-            //         hddm_s::OriginList os = vs().addOrigins();
-            //         hddm_s::ProductList ps = vs().addProducts(part4Vect.size()-2);
-                    
-            //         os().setT(event_time);
-            //         os().setVx(vertex.at(0).X());
-            //         os().setVy(vertex.at(0).Y());
-            //         os().setVz(vertex.at(0).Z());
-            //         for (int i=2; i < part4Vect.size(); i++) {
-            //             ps(i-2).setType((Particle_t) geant_ID[i]);
-            //             ps(i-2).setPdgtype(pdg_ID[i]);
-            //             ps(i-2).setId(i-1);         // unique value for this particle within the event
-            //             ps(i-2).setParentid(0);     // All internally generated particles have no parent
-            //             ps(i-2).setMech(0);       //   maybe this should be set to something?
-                        
-            //             hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
-            //             pmoms().setPx(part4Vect.at(i).Px());
-            //             pmoms().setPy(part4Vect.at(i).Py());
-            //             pmoms().setPz(part4Vect.at(i).Pz());
-            //             pmoms().setE(part4Vect.at(i).E());
-            //         }
-            //         if (WillBeRootOutput){
-            //             mytree->Fill ();
-            //             *outstream << record;
-            //         }
-            //         Nevents++;
-            //     }
-            // }
+                }
+                
+                if (WillBeRootOutput){
+                    mytree->Fill ();
+                    *outstream << record;
+                }
+                Nevents++;
+             }
             else {
                 for (int fspartl=0;fspartl<num_tracks-2; fspartl++){
                     temp4vectpoint=eventPS.GetDecay(fspartl);
