@@ -293,7 +293,8 @@ int main (int argc, char **argv){
               if (!in1.good()) break;
               if (nlines < 5) printf("w=%8f, t=%8f, x=%8f, y=%8f\n",w,t,x,y);
               SolXS->SetPoint(nlines, w, t, x);
-              SolPY->SetPoint(nlines, w, t, y/x);
+              //SolPY->SetPoint(nlines, w, t, y/x);
+	      SolPY->SetPoint(nlines, w, t, y);
               nlines++;
           }
           printf(" found %d points\n",nlines);
@@ -1684,7 +1685,7 @@ int main (int argc, char **argv){
 	      }
             }
 	    else if (usesol==1 && cascade0gen){
-	      TLorentzVector cms, Kaoncms;
+	      TLorentzVector cms, Kaoncms, Xicms;
 	      double costheta, trueW;
 	      double evalxs=0.0;
 	      double evalpy=0.0;
@@ -1698,12 +1699,21 @@ int main (int argc, char **argv){
 	      
 	      //true W in this case needs to be Xi^{0} cm momentum
 	      trueW=W.M();
-	      
 	      Wval=trueW;
+
+	      
 	      Kaoncms=temp4vect;
 	      Kaoncms.Boost(-cms.BoostVector());
 	      costheta=TMath::Cos(Kaoncms.Theta());
 	      costhetaK=costheta;
+
+	      //Xi0
+	      temp4vectpoint=eventPS.GetDecay(1);
+	      temp4vect = *temp4vectpoint;
+	      Xicms=temp4vect;
+	      Xicms.Boost(-cms.BoostVector());
+	      trueW = Xicms.Rho() * 1000; //momentum in MeV
+
 	      evalxs=SolXS->Interpolate(trueW,costheta);
 	      cs=evalxs;
 	      runtemp=randomNum.Uniform(0,maxxs);
@@ -1725,7 +1735,6 @@ int main (int argc, char **argv){
 		piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
 		runtemp=randomNum.Uniform(0,1.50);
 		evalpy=SolPY->Interpolate(trueW,costheta);
-		//evalpy=0.01;
 		poly=evalpy;
 		if(runtemp>(1+evalpy*0.458*piontheta)){
 		  continue;
