@@ -1528,7 +1528,8 @@ int main (int argc, char **argv){
 	    //            if ((num_tracks>4) && (randomNum.Uniform(0,eventPS.GetWtMax()*XS_weight_Max)>weight)) // to produce flat distributions for events with more than 2 FS particles.
 	    //                continue;
             
-            if (usesol==1 && cascadegen){
+            //if (usesol==1 && cascadegen){
+	    if (usesol==1 && (cascadegen || cascade0gen)){
 	      TLorentzVector cms, Kaoncms;
 	      double costheta, trueW;
 	      double evalxs=0.0;
@@ -1542,10 +1543,23 @@ int main (int argc, char **argv){
 	      cms=W;
 	      trueW=W.M();
 	      Wval=trueW;
+
+	      
 	      Kaoncms=temp4vect;
 	      Kaoncms.Boost(-cms.BoostVector());
 	      costheta=TMath::Cos(Kaoncms.Theta());
 	      costhetaK=costheta;
+
+	      if(cascade0gen){
+		TLorentzVector Xicms;
+		//Xi0
+		temp4vectpoint=eventPS.GetDecay(1);
+		temp4vect = *temp4vectpoint;
+		Xicms=temp4vect;
+		Xicms.Boost(-cms.BoostVector());
+		trueW = Xicms.Rho() * 1000; //momentum in MeV
+	      }
+	      
 	      evalxs=SolXS->Interpolate(trueW,costheta);
 	      cs=evalxs;
 	      runtemp=randomNum.Uniform(0,maxxs);
@@ -1615,8 +1629,7 @@ int main (int argc, char **argv){
 		tpros().setMass(ParticleMass(targetType));
 		hddm_s::MomentumList tmoms = ts().addMomenta();
                     
-                    
-                    
+                
 		// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
 		// (the front face of the spectrometer)
 		// currently assuming that the distance between the center of the KPT target and the front
@@ -1637,7 +1650,6 @@ int main (int argc, char **argv){
 		    event_time += beam_bucket*BEAM_BUNCH_SEPARATION;
 		  }
 		}
-		
 		
 		
 		tmoms().setPx(0);
@@ -1684,303 +1696,124 @@ int main (int argc, char **argv){
 		Nevents++;
 	      }
             }
-	    else if (usesol==1 && cascade0gen){
-	      TLorentzVector cms, Kaoncms, Xicms;
-	      double costheta, trueW;
-	      double evalxs=0.0;
-	      double evalpy=0.0;
-	      temp4vectpoint=eventPS.GetDecay(0);
-	      temp4vect = *temp4vectpoint;
-	      //Kaon
-	      part4Vect.push_back(temp4vect);
-	      vertex.push_back(tempVert);
-	      
-	      cms=W;
-	      
-	      //true W in this case needs to be Xi^{0} cm momentum
-	      trueW=W.M();
-	      Wval=trueW;
-
-	      
-	      Kaoncms=temp4vect;
-	      Kaoncms.Boost(-cms.BoostVector());
-	      costheta=TMath::Cos(Kaoncms.Theta());
-	      costhetaK=costheta;
-
-	      //Xi0
-	      temp4vectpoint=eventPS.GetDecay(1);
-	      temp4vect = *temp4vectpoint;
-	      Xicms=temp4vect;
-	      Xicms.Boost(-cms.BoostVector());
-	      trueW = Xicms.Rho() * 1000; //momentum in MeV
-
-	      evalxs=SolXS->Interpolate(trueW,costheta);
-	      cs=evalxs;
-	      runtemp=randomNum.Uniform(0,maxxs);
-	      if (runtemp>evalxs){
-		continue;
-	      }
-	      
-	      W=*eventPS.GetDecay(1);
-	      if (lifetimef1 && eventPS1.SetDecay(W, 2, FSmasses1)){
-		weight = eventPS1.Generate();
-		gammaval=eventPS.GetDecay(1)->Gamma();
-		lifetimef1->SetParameter(1,gammaval);
-		lifetime=lifetimef1->GetRandom(0,5.0);
-		beta=eventPS.GetDecay(1)->BoostVector();
-		tempVert2=tempVert+29.9792*lifetime*beta;
-		pizero4vec=*eventPS1.GetDecay(0);
-		pizero4vec.Boost(-beta);
-		yaxis=eventPS.GetDecay(1)->Vect().Cross(zaxis);
-		piontheta=TMath::Cos(pizero4vec.Angle(yaxis));
-		runtemp=randomNum.Uniform(0,1.50);
-		evalpy=SolPY->Interpolate(trueW,costheta);
-		poly=evalpy;
-		if(runtemp>(1+evalpy*0.458*piontheta)){
-		  continue;
-		}
-		for (int fspartl=0;fspartl<2; fspartl++){
-		  temp4vectpoint=eventPS1.GetDecay(fspartl);
-		  temp4vect = *temp4vectpoint;
-		  part4Vect.push_back(temp4vect);
-		  vertex.push_back(tempVert2);
-		}
-		// for (int fspartl=0;fspartl<num_tracks-2; fspartl++){
-		//       temp4vectpoint=eventPS.GetDecay(fspartl);
-		//       temp4vect = *temp4vectpoint;
-		//       part4Vect.push_back(temp4vect);
-		//       vertex.push_back(tempVert);
-		//   }
-                
-                if(PrintOutput){
-		  switch((outputFileType_t) outputKey){
-		  case term:
-		    events.Write(&part4Vect);
-		    break;
-		  case lund:
-		    outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
-		    out1<<outfilestream.rdbuf();
-		    outfilestream.clear();
-		    break;
-		  case hepmc:
-		    outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
-		    out1<<outfilestream.rdbuf();
-		    outfilestream.clear();
-		    break;
-		  }
-                }
-	      }
-                // Start a new event
-                hddm_s::HDDM record;                
-                hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
-                
-                pes().setRunNo(runNumber);
-                pes().setEventNo(Nevents); //event number
-                
-                hddm_s::ReactionList rs = pes().addReactions();
-                hddm_s::TargetList ts = rs().addTargets();
-                ts().setType(targetType);
-                hddm_s::PropertiesList tpros = ts().addPropertiesList();
-                tpros().setCharge(ParticleCharge(targetType));
-                tpros().setMass(ParticleMass(targetType));
-                hddm_s::MomentumList tmoms = ts().addMomenta();
-
-                
-				// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
-				// (the front face of the spectrometer)
-				// currently assuming that the distance between the center of the KPT target and the front
-				// of the spectrometer is 24 m, and the KPT has a length of 40 cm
-				// so set the event time based on that, assuming the kaons are moving purely in the z-direction
-				// note that standard GlueX units are cm and ns
-				double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
-				if(SIMULATE_BEAM_TIMING) {
-					double z_production = 0.;
-					if(SIMULATE_KPT_THICKNESS) 
-						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
-					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
-					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
-					
-					if(BLEED_THROUGH_MODE) {
-						// shift by some number of beam bunches
-						int beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
-						event_time += static_cast<double>(beam_bucket)*BEAM_BUNCH_SEPARATION;
-					}
-				}
-				
-                tmoms().setPx(0);
-                tmoms().setPy(0);
-                tmoms().setPz(0);
-                tmoms().setE(ParticleMass(targetType));
-                hddm_s::BeamList bs = rs().addBeams();
-                bs().setType(beamType);
-                
-                hddm_s::PropertiesList bpros = bs().addPropertiesList();
-                bpros().setCharge(ParticleCharge(beamType));
-                bpros().setMass(ParticleMass(beamType));
-                hddm_s::MomentumList bmoms = bs().addMomenta();
-                bmoms().setPx(part4Vect.at(0).Px());
-                bmoms().setPy(part4Vect.at(0).Py());
-                bmoms().setPz(part4Vect.at(0).Pz());
-                bmoms().setE(part4Vect.at(0).E());
-                
-                hddm_s::VertexList vs = rs().addVertices();
-                hddm_s::OriginList os = vs().addOrigins();
-                hddm_s::ProductList ps = vs().addProducts(num_tracks-2);
-                
-                os().setT(event_time);
-                os().setVx(vertex.at(0).X());
-                os().setVy(vertex.at(0).Y());
-                os().setVz(vertex.at(0).Z());
-                
-
-		//for (int i=2; i < part4Vect.size(); i++) {
-                for (int i=2; i < num_tracks; i++) {
-                    
-                    ps(i-2).setType((Particle_t) geant_ID[i]);
-                    ps(i-2).setPdgtype(pdg_ID[i]);
-                    ps(i-2).setId(i-1);         // unique value for this particle within the event
-                    ps(i-2).setParentid(0);     // All internally generated particles have no parent
-                    ps(i-2).setMech(0);       //   maybe this should be set to something?
-                    
-                    hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
-                    
-                    pmoms().setPx(part4Vect.at(i).Px());
-                    pmoms().setPy(part4Vect.at(i).Py());
-                    pmoms().setPz(part4Vect.at(i).Pz());
-                    pmoms().setE(part4Vect.at(i).E());
-                    
-                }
-                
-                if (WillBeRootOutput){
-                    mytree->Fill ();
-                    *outstream << record;
-                }
-                Nevents++;
-             }
             else {
-                for (int fspartl=0;fspartl<num_tracks-2; fspartl++){
-                    temp4vectpoint=eventPS.GetDecay(fspartl);
-                    temp4vect = *temp4vectpoint;
-                    part4Vect.push_back(temp4vect);
-                    vertex.push_back(tempVert);
-                }
+	      for (int fspartl=0;fspartl<num_tracks-2; fspartl++){
+		temp4vectpoint=eventPS.GetDecay(fspartl);
+		temp4vect = *temp4vectpoint;
+		part4Vect.push_back(temp4vect);
+		vertex.push_back(tempVert);
+	      }
+              
+	      if(PrintOutput){
+		switch((outputFileType_t) outputKey){
+		case term:
+		  events.Write(&part4Vect);
+		  break;
+		case lund:
+		  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
+		  out1<<outfilestream.rdbuf();
+		  outfilestream.clear();
+		  break;
+		case hepmc:
+		  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
+		  out1<<outfilestream.rdbuf();
+		  outfilestream.clear();
+		  break;
+		}
+	      }
+              
+	      // Start a new event
+	      hddm_s::HDDM record;
+              
+	      hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
+              
+	      pes().setRunNo(runNumber);
+	      pes().setEventNo(Nevents); //event number
+              
+	      hddm_s::ReactionList rs = pes().addReactions();
+	      hddm_s::TargetList ts = rs().addTargets();
+	      ts().setType(targetType);
+	      hddm_s::PropertiesList tpros = ts().addPropertiesList();
+	      tpros().setCharge(ParticleCharge(targetType));
+	      tpros().setMass(ParticleMass(targetType));
+	      hddm_s::MomentumList tmoms = ts().addMomenta();
+              
+	      // for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
+	      // (the front face of the spectrometer)
+	      // currently assuming that the distance between the center of the KPT target and the front
+	      // of the spectrometer is 24 m, and the KPT has a length of 40 cm
+	      // so set the event time based on that, assuming the kaons are moving purely in the z-direction
+	      // note that standard GlueX units are cm and ns
+	      double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
+	      if(SIMULATE_BEAM_TIMING) {
+		double z_production = 0.;
+		if(SIMULATE_KPT_THICKNESS) 
+		  z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
+		double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
+		event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
+		
+		if(BLEED_THROUGH_MODE) {
+		  // shift by some number of beam bunches
+		  int beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
+		  event_time += static_cast<double>(beam_bucket)*BEAM_BUNCH_SEPARATION;
+		}
+	      }
+	      
+	      tmoms().setPx(0);
+	      tmoms().setPy(0);
+	      tmoms().setPz(0);
+	      tmoms().setE(ParticleMass(targetType));
+	      hddm_s::BeamList bs = rs().addBeams();
+	      bs().setType(beamType);
+              
+	      hddm_s::PropertiesList bpros = bs().addPropertiesList();
+	      bpros().setCharge(ParticleCharge(beamType));
+	      bpros().setMass(ParticleMass(beamType));
+	      hddm_s::MomentumList bmoms = bs().addMomenta();
+	      bmoms().setPx(part4Vect.at(0).Px());
+	      bmoms().setPy(part4Vect.at(0).Py());
+	      bmoms().setPz(part4Vect.at(0).Pz());
+	      bmoms().setE(part4Vect.at(0).E());
+              
+	      hddm_s::VertexList vs = rs().addVertices();
+	      hddm_s::OriginList os = vs().addOrigins();
+	      hddm_s::ProductList ps = vs().addProducts(num_tracks-2);
+              
+	      os().setT(event_time);
+	      os().setVx(vertex.at(0).X());
+	      os().setVy(vertex.at(0).Y());
+	      os().setVz(vertex.at(0).Z());
+              
+              
+	      for (int i=2; i < num_tracks; i++) {
+		
+		ps(i-2).setType((Particle_t) geant_ID[i]);
+		ps(i-2).setPdgtype(pdg_ID[i]);
+		ps(i-2).setId(i-1);         // unique value for this particle within the event
+		ps(i-2).setParentid(0);     // All internally generated particles have no parent
+		ps(i-2).setMech(0);       //   maybe this should be set to something?
                 
-                if(PrintOutput){
-                    //cout<<"("<<part4Vect.at(0).M()<<","<<part4Vect.at(0).Px()<<","<<part4Vect.at(0).Py()<<","<<part4Vect.at(0).Pz()<<") ("
-                    //<<part4Vect.at(1).M()<<","<<part4Vect.at(1).Px()<<","<<part4Vect.at(1).Py()<<","<<part4Vect.at(1).Pz()<<") -> ";
-                    //for (int fspartl=2;fspartl<num_tracks; fspartl++){
-                    //    cout<<"("<<part4Vect.at(fspartl).M()<<","<<part4Vect.at(fspartl).Px()<<","<<part4Vect.at(fspartl).Py()<<","<<part4Vect.at(fspartl).Pz()<<") ";
-                    //}
-                    //cout<<endl;
-			switch((outputFileType_t) outputKey){
-			case term:
-			  events.Write(&part4Vect);
-			  break;
-			case lund:
-			  outfilestream = events.WriteLund(&part4Vect,&pdg_ID,&vertex);
-			  out1<<outfilestream.rdbuf();
-			  outfilestream.clear();
-			  break;
-			case hepmc:
-			  outfilestream = events.WriteHEPmc(&part4Vect,&pdg_ID,&vertex);
-			  out1<<outfilestream.rdbuf();
-			  outfilestream.clear();
-			  break;
-			}
-                }
+		hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
                 
-                // Start a new event
-                hddm_s::HDDM record;
+		pmoms().setPx(part4Vect.at(i).Px());
+		pmoms().setPy(part4Vect.at(i).Py());
+		pmoms().setPz(part4Vect.at(i).Pz());
+		pmoms().setE(part4Vect.at(i).E());
                 
-                hddm_s::PhysicsEventList pes = record.addPhysicsEvents();
-                
-                pes().setRunNo(runNumber);
-                pes().setEventNo(Nevents); //event number
-                
-                hddm_s::ReactionList rs = pes().addReactions();
-                hddm_s::TargetList ts = rs().addTargets();
-                ts().setType(targetType);
-                hddm_s::PropertiesList tpros = ts().addPropertiesList();
-                tpros().setCharge(ParticleCharge(targetType));
-                tpros().setMass(ParticleMass(targetType));
-                hddm_s::MomentumList tmoms = ts().addMomenta();
-                
-				// for now, assume that t=0 happens when the expected time of the photon bunch reaches z=0
-				// (the front face of the spectrometer)
-				// currently assuming that the distance between the center of the KPT target and the front
-				// of the spectrometer is 24 m, and the KPT has a length of 40 cm
-				// so set the event time based on that, assuming the kaons are moving purely in the z-direction
-				// note that standard GlueX units are cm and ns
-				double event_time = - DISTANCE_KPT_SPECTROMETER / SPEED_OF_LIGHT_CM_NS;
-				if(SIMULATE_BEAM_TIMING) {
-					double z_production = 0.;
-					if(SIMULATE_KPT_THICKNESS) 
-						z_production = randomNum.Uniform(KPT_Z_LENGTH) - KPT_Z_LENGTH/2.;
-					double beam_velocity = (part4Vect.at(0).P() * SPEED_OF_LIGHT_CM_NS ) / part4Vect.at(0).E();
-					event_time += ( DISTANCE_KPT_SPECTROMETER + z_production + vertex[0].Z() ) / beam_velocity;  
-					
-					if(BLEED_THROUGH_MODE) {
-						// shift by some number of beam bunches
-						int beam_bucket = randomNum.Integer(NUM_BLEEDTHROUGH_BUNCH_POS - NUM_BLEEDTHROUGH_BUNCH_NEG + 1) + NUM_BLEEDTHROUGH_BUNCH_NEG;
-						event_time += static_cast<double>(beam_bucket)*BEAM_BUNCH_SEPARATION;
-					}
-				}
-				
-                tmoms().setPx(0);
-                tmoms().setPy(0);
-                tmoms().setPz(0);
-                tmoms().setE(ParticleMass(targetType));
-                hddm_s::BeamList bs = rs().addBeams();
-                bs().setType(beamType);
-                
-                hddm_s::PropertiesList bpros = bs().addPropertiesList();
-                bpros().setCharge(ParticleCharge(beamType));
-                bpros().setMass(ParticleMass(beamType));
-                hddm_s::MomentumList bmoms = bs().addMomenta();
-                bmoms().setPx(part4Vect.at(0).Px());
-                bmoms().setPy(part4Vect.at(0).Py());
-                bmoms().setPz(part4Vect.at(0).Pz());
-                bmoms().setE(part4Vect.at(0).E());
-                
-                hddm_s::VertexList vs = rs().addVertices();
-                hddm_s::OriginList os = vs().addOrigins();
-                hddm_s::ProductList ps = vs().addProducts(num_tracks-2);
-                
-                os().setT(event_time);
-                os().setVx(vertex.at(0).X());
-                os().setVy(vertex.at(0).Y());
-                os().setVz(vertex.at(0).Z());
-                
-                
-                for (int i=2; i < num_tracks; i++) {
-                    
-                    ps(i-2).setType((Particle_t) geant_ID[i]);
-                    ps(i-2).setPdgtype(pdg_ID[i]);
-                    ps(i-2).setId(i-1);         // unique value for this particle within the event
-                    ps(i-2).setParentid(0);     // All internally generated particles have no parent
-                    ps(i-2).setMech(0);       //   maybe this should be set to something?
-                    
-                    hddm_s::MomentumList pmoms = ps(i-2).addMomenta();
-                    
-                    pmoms().setPx(part4Vect.at(i).Px());
-                    pmoms().setPy(part4Vect.at(i).Py());
-                    pmoms().setPz(part4Vect.at(i).Pz());
-                    pmoms().setE(part4Vect.at(i).E());
-                    
-                }
-                
-                if (WillBeRootOutput){
-                    mytree->Fill ();
-                    *outstream << record;
-                }
-                Nevents++;
+	      }
+              
+	      if (WillBeRootOutput){
+		mytree->Fill ();
+		*outstream << record;
+	      }
+	      Nevents++;
             }
         }
         
         numberofloops++;
         if (numberofloops>10000){
-            cout<<"Reaction Threshold above energies selected. Change Beam energy"<<endl;
-            return 1;
+	  cout<<"Reaction Threshold above energies selected. Change Beam energy"<<endl;
+	  return 1;
         }
     }
     if (WillBeRootOutput){
